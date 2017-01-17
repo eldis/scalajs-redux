@@ -46,7 +46,12 @@ object ScalaJSRedux {
 
   object Projects {
     lazy val scalaJsRedux = project.in(file("."))
-    .configure(Settings.scalajsProject)
+      .configure(Settings.scalajsProject)
+      .settings(
+        libraryDependencies ++= Seq(
+          Dependencies.scalaJsReact
+        )
+      )
   }
 
 }
