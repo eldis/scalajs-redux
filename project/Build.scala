@@ -30,7 +30,8 @@ object ScalaJSRedux {
 
     def commonProject: PC =
       _.settings(
-        scalaVersion := Versions.scala
+        scalaVersion := Versions.scala,
+        organization := "ru.eldis"
       )
 
     def scalajsProject: PC =
@@ -42,12 +43,25 @@ object ScalaJSRedux {
         .settings(
         enableReloadWorkflow := false
       )
+
+    def publish: PC =
+      _.settings(
+        publishMavenStyle := true,
+        publishTo := {
+          val nexus = "http://nexus.eldissoft.lan/nexus/content/repositories/"
+          if (isSnapshot.value)
+            Some("Snapshots" at nexus + "snapshots")
+          else
+            Some("Releases" at nexus + "releases")
+        }
+      )
   }
 
   object Projects {
     lazy val scalaJsRedux = project.in(file("."))
-      .configure(Settings.scalajsProject)
+      .configure(Settings.scalajsProject, Settings.publish)
       .settings(
+        name := "scalajs-redux",
         libraryDependencies ++= Seq(
           Dependencies.scalaJsReact
         )
