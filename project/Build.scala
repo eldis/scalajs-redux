@@ -31,7 +31,7 @@ object ScalaJSRedux {
     def commonProject: PC =
       _.settings(
         scalaVersion := Versions.scala,
-        organization := "ru.eldis"
+        organization := "com.github.eldis"
       )
 
     def scalajsProject: PC =
@@ -48,11 +48,11 @@ object ScalaJSRedux {
       _.settings(
         publishMavenStyle := true,
         publishTo := {
-          val nexus = "http://nexus.eldissoft.lan/nexus/content/repositories/"
+          val nexus = "https://oss.sonatype.org/"
           if (isSnapshot.value)
-            Some("Snapshots" at nexus + "snapshots")
+            Some("snapshots" at nexus + "content/repositories/snapshots")
           else
-            Some("Releases" at nexus + "releases")
+            Some("releases"  at nexus + "service/local/staging/deploy/maven2")
         }
       )
   }
