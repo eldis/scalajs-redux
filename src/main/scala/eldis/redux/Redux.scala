@@ -3,6 +3,7 @@ package eldis.redux
 import scala.scalajs.js
 import js.|
 import js.annotation._
+import scala.concurrent.{ Future, ExecutionContext }
 
 object Redux {
 
@@ -17,8 +18,17 @@ object Redux {
   }
 
   object WrappedAction {
+
+    val ActionType = "scalaJsReduxAction"
+    val AsyncActionType = "scalaJsReduxAsyncAction"
+
     def apply[A](a: A) = js.Dynamic.literal(
-      `type` = "scalaJsReduxAction",
+      `type` = ActionType,
+      scalaJsReduxAction = a.asInstanceOf[js.Any]
+    ).asInstanceOf[WrappedAction]
+
+    def apply[A](a: Future[A]) = js.Dynamic.literal(
+      `type` = AsyncActionType,
       scalaJsReduxAction = a.asInstanceOf[js.Any]
     ).asInstanceOf[WrappedAction]
   }
@@ -30,10 +40,10 @@ object Redux {
   @js.native
   trait MiddlewareArg[S, A] extends js.Object {
     val getState: StateGetter[S] = js.native
-    val dispatch: Dispatcher[A] = js.native
+    val dispatch: RawDispatcher = js.native
   }
 
-  type Middleware[S, A] = js.Function1[MiddlewareArg[S, A], js.Function1[Dispatcher[A], Dispatcher[A]]]
+  type Middleware[S, A] = js.Function1[MiddlewareArg[S, A], js.Function1[RawDispatcher, RawDispatcher]]
 
   type Listener = js.Function0[Unit]
 
@@ -47,7 +57,7 @@ object Redux {
     val replaceReducer: js.Function1[Reducer[S, A], Unit] = js.native
   }
 
-  type Enhancer[S, A] = js.Function1[Store[S, A], Store[S, A]]
+  type Enhancer[S, A] = js.Function1[js.Function, js.Function3[Reducer[S, A | js.Object], js.UndefOr[S], js.UndefOr[js.Function], Store[S, A]]]
 
   @JSImport("redux", JSImport.Namespace)
   @js.native
@@ -55,25 +65,63 @@ object Redux {
     def createStore[S, A](
       reducer: Reducer[S, A | js.Object],
       initialState: js.UndefOr[S] = js.undefined,
-      enhancer: js.UndefOr[Enhancer[S, A | js.Object]] = js.undefined
+      enhancer: js.UndefOr[Enhancer[S, A]] = js.undefined
     ): Store[S, A] = js.native
+
+    def applyMiddleware[S, A](xs: Middleware[S, A]*): Enhancer[S, A] = js.native
   }
 
   def wrapReducer[S, A](r: Reducer[S, A]): Reducer[S, A | js.Object] =
     (s: S, a: A | js.Object) => {
       val aDyn = a.asInstanceOf[js.Dynamic]
-      if (aDyn.scalaJsReduxAction != js.undefined)
-        r(s, aDyn.scalaJsReduxAction.asInstanceOf[A])
-      else
+      if (aDyn.`type` != js.undefined) {
+        if (aDyn.`type`.asInstanceOf[String] == WrappedAction.ActionType)
+          r(s, aDyn.scalaJsReduxAction.asInstanceOf[A])
+        else
+          s
+      } else {
         s
+      }
     }
+
+  def asyncEnhancer[S, A](implicit ec: ExecutionContext): Enhancer[S, A] = {
+    val asyncMiddleware: Middleware[S, A] = ((arg: MiddlewareArg[S, A]) => {
+      ((next: RawDispatcher) =>
+        {
+          ((action: WrappedAction | js.Object) =>
+            {
+              val aDyn = action.asInstanceOf[js.Dynamic]
+              if (aDyn.`type` != js.undefined && aDyn.`type`.asInstanceOf[String] == WrappedAction.AsyncActionType) {
+                val f = aDyn.scalaJsReduxAction.asInstanceOf[Future[A]]
+                f.onSuccess {
+                  case a => {
+                    println(a)
+                    arg.dispatch(WrappedAction(a))
+                  }
+                }
+                js.Dynamic.literal()
+              } else
+                next(action)
+            }): RawDispatcher
+        }): js.Function1[RawDispatcher, RawDispatcher]
+    }): Middleware[S, A]
+    Impl.applyMiddleware(asyncMiddleware)
+  }
 
   def createStore[S, A](
     reducer: Reducer[S, A],
     initialState: js.UndefOr[S] = js.undefined,
-    enhancer: js.UndefOr[Enhancer[S, A | js.Object]] = js.undefined
-  ): Store[S, A] = Impl.createStore(wrapReducer(reducer), initialState, enhancer)
+    enhancer: js.UndefOr[Enhancer[S, A]] = js.undefined
+  )(implicit ec: ExecutionContext): Store[S, A] = {
+    val enh: Enhancer[S, A] = asyncEnhancer(ec)
+    val create = enh(Impl.createStore _)
+    create(wrapReducer(reducer), initialState, enhancer)
+  }
+
+  def applyMiddleware[S, A](xs: Middleware[S, A]*): Enhancer[S, A] = Impl.applyMiddleware(xs: _*)
 
   def createAction[A](a: A): WrappedAction = WrappedAction(a)
+
+  def createAction[A](a: Future[A]): WrappedAction = WrappedAction(a)
 
 }

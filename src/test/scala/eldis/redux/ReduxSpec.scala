@@ -1,8 +1,12 @@
 package eldis.redux
 
 import org.scalatest._
+import scala.concurrent.Promise
+import scala.concurrent.Future
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.util.Try
 
-class ReduxSpec extends FunSpec with Matchers {
+class ReduxSpec extends AsyncFunSpec with Matchers {
 
   case class State(
     num: Int = 0,
@@ -17,25 +21,43 @@ class ReduxSpec extends FunSpec with Matchers {
 
     import Redux._
 
-    def reducer(s: State, a: Action): State =
+    def reducer(s: State, a: Action): State = {
+      println("REDUCER: " + a)
       a match {
         case ChangeNum(v) => s.copy(num = v)
         case ChangeStr(v) => s.copy(str = v)
       }
-
-    var store = createStore[State, Action](reducer _, State())
-
-    it("can return the state that it holds") {
-      store.getState() shouldBe State()
     }
 
-    it("can dispatch actions") {
+    def mkStore = createStore[State, Action](reducer _, State())
+
+    it("must initialize state with defaults") {
+      mkStore.getState() shouldBe State()
+    }
+
+    it("must dispatch actions") {
+
+      val store = mkStore
 
       store.dispatch(createAction(ChangeNum(100)))
       store.getState().num shouldBe 100
 
       store.dispatch(createAction(ChangeStr("test")))
       store.getState().str shouldBe "test"
+    }
+
+    it("must dispatch async actions") {
+      val store = mkStore
+
+      val p = Promise[Action]()
+      val f = p.future
+      store.dispatch(createAction(f))
+
+      store.getState() shouldBe State()
+
+      p.success(ChangeNum(1))
+
+      store.getState().num shouldBe 1
     }
 
   }
