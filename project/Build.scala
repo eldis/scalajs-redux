@@ -10,6 +10,8 @@ object ScalaJSRedux {
   object Versions {
     val scala = "2.11.8"
     val scalaJsReact = "0.11.3"
+
+    val scalatest = "3.0.1"
   }
 
   object JsVersions {
@@ -23,6 +25,8 @@ object ScalaJSRedux {
 
   object Dependencies {
     lazy val scalaJsReact = "com.github.japgolly.scalajs-react" %%%! "core" % Versions.scalaJsReact
+
+    lazy val scalatest = "org.scalatest" %%%! "scalatest" % Versions.scalatest % "test"
   }
 
   object Settings {
@@ -59,11 +63,19 @@ object ScalaJSRedux {
 
   object Projects {
     lazy val scalaJsRedux = project.in(file("."))
-      .configure(Settings.scalajsProject, Settings.publish)
+      .configure(Settings.scalajsProject, Settings.jsBundler, Settings.publish)
       .settings(
         name := "scalajs-redux",
+
+        requiresDOM in Test := true,
+
         libraryDependencies ++= Seq(
-          Dependencies.scalaJsReact
+          Dependencies.scalaJsReact,
+          Dependencies.scalatest
+        ),
+
+        npmDevDependencies in Test ++= Seq(
+          "redux" -> JsVersions.redux
         )
       )
   }
