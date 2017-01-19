@@ -33,7 +33,7 @@ object Redux {
     ).asInstanceOf[WrappedAction]
   }
 
-  type Dispatcher[A] = js.Function1[A, js.Any]
+  type Dispatcher[A] = js.Function1[A, Unit]
 
   type RawDispatcher = Dispatcher[WrappedAction | js.Object]
 
@@ -99,7 +99,6 @@ object Redux {
                     arg.dispatch(WrappedAction(a))
                   }
                 }
-                js.Dynamic.literal()
               } else
                 next(action)
             }): RawDispatcher

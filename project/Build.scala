@@ -27,6 +27,13 @@ object ScalaJSRedux {
     lazy val scalaJsReact = "com.github.japgolly.scalajs-react" %%%! "core" % Versions.scalaJsReact
 
     lazy val scalatest = "org.scalatest" %%%! "scalatest" % Versions.scalatest % "test"
+
+    lazy val jsReactRedux = Seq(
+      "react" -> JsVersions.react,
+      "react-dom" -> JsVersions.react,
+      "redux" -> JsVersions.redux,
+      "react-redux" -> JsVersions.reactRedux
+    )
   }
 
   object Settings {
@@ -41,12 +48,46 @@ object ScalaJSRedux {
     def scalajsProject: PC =
       _.configure(commonProject)
       .enablePlugins(ScalaJSPlugin)
+      .settings(
+        requiresDOM in Test := true
+      )
 
     def jsBundler: PC =
       _.enablePlugins(ScalaJSBundlerPlugin)
-        .settings(
-        enableReloadWorkflow := false
+      .settings(
+        enableReloadWorkflow := false,
+        libraryDependencies += Dependencies.scalatest,
+        npmDevDependencies in Test ++= Seq(
+          "redux" -> JsVersions.redux
+        )
       )
+
+    def react: PC =
+      _.settings(
+        libraryDependencies += Dependencies.scalaJsReact,
+        npmDependencies in Compile ++= Dependencies.jsReactRedux
+      )
+
+    def exampleProject(prjName: String, useReact: Boolean = false): PC = { p: Project =>
+      p.in(file("examples") / prjName)
+        .configure(scalajsProject, jsBundler)
+        .settings(
+          name := prjName,
+
+          npmDevDependencies in Compile ++= Seq(
+            "html-webpack-plugin" -> JsVersions.htmlWebpackPlugin,
+            "html-loader" -> JsVersions.htmlLoader
+          ),
+
+          webpackConfigFile in fastOptJS := Some(baseDirectory.value / "config" / "webpack.config.js"),
+          webpackConfigFile in fullOptJS := Some(baseDirectory.value / "config" / "webpack.config.js")
+        )
+      } compose { pc =>
+        if(useReact)
+          pc.configure(react)
+        else
+          pc
+      }
 
     def publish: PC =
       _.settings(
@@ -63,21 +104,20 @@ object ScalaJSRedux {
 
   object Projects {
     lazy val scalaJsRedux = project.in(file("."))
-      .configure(Settings.scalajsProject, Settings.jsBundler, Settings.publish)
-      .settings(
-        name := "scalajs-redux",
-
-        requiresDOM in Test := true,
-
-        libraryDependencies ++= Seq(
-          Dependencies.scalaJsReact,
-          Dependencies.scalatest
-        ),
-
-        npmDevDependencies in Test ++= Seq(
-          "redux" -> JsVersions.redux
-        )
+      .configure(
+        Settings.scalajsProject, Settings.jsBundler, Settings.publish, Settings.react
       )
+      .settings(
+        name := "scalajs-redux"
+      )
+
+    lazy val exReact = project
+      .configure(
+        Settings.exampleProject(
+          "react",
+          useReact = true)
+      )
+      .dependsOn(scalaJsRedux)
   }
 
 }
