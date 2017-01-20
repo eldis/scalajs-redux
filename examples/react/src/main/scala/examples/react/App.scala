@@ -51,7 +51,7 @@ object Filter {
     }
     .build
 
-  val connected = ReactRedux.createFactory(
+  val connected = ReactRedux.connect(
     (state: State, dispatch: Redux.Dispatcher[Action]) => Props(
       value = state.filter,
       onChange = Some((v: String) => dispatch(ChangeFilter(v)))
@@ -76,7 +76,7 @@ object List {
     }
     .build
 
-  val connected = ReactRedux.createFactory(
+  val connected = ReactRedux.connect(
     (state: State, dispatch: Redux.Dispatcher[Action]) => Props(
       elements = state.filteredElements
     )

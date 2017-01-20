@@ -5,6 +5,9 @@ import js.|
 import js.annotation._
 import scala.concurrent.{ Future, ExecutionContext }
 
+/**
+ * The redux facade object.
+ */
 object Redux {
 
   type Reducer[S, A] = js.Function2[S, A, S]
@@ -17,7 +20,7 @@ object Redux {
     val scalaJsReduxAction: js.Any = js.native
   }
 
-  object WrappedAction {
+  private object WrappedAction {
 
     val ActionType = "scalaJsReduxAction"
     val AsyncActionType = "scalaJsReduxAsyncAction"
@@ -49,6 +52,12 @@ object Redux {
 
   type Unsubscriber = js.Function0[Unit]
 
+  /**
+   * The redux store object.
+   *
+   * See [[http://redux.js.org/docs/api/Store.html the redux documentation]]
+   * for detailed description.
+   */
   @js.native
   trait Store[S, A] extends js.Object {
     val getState: StateGetter[S] = js.native
@@ -71,7 +80,7 @@ object Redux {
     def applyMiddleware[S, A](xs: Middleware[S, A]*): Enhancer[S, A] = js.native
   }
 
-  def wrapReducer[S, A](r: Reducer[S, A]): Reducer[S, A | js.Object] =
+  private def wrapReducer[S, A](r: Reducer[S, A]): Reducer[S, A | js.Object] =
     (s: S, a: A | js.Object) => {
       val aDyn = a.asInstanceOf[js.Dynamic]
       if (aDyn.`type` != js.undefined) {
@@ -84,7 +93,7 @@ object Redux {
       }
     }
 
-  def asyncEnhancer[S, A](implicit ec: ExecutionContext): Enhancer[S, A] = {
+  private def asyncEnhancer[S, A](implicit ec: ExecutionContext): Enhancer[S, A] = {
     val asyncMiddleware: Middleware[S, A] = ((arg: MiddlewareArg[S, A]) => {
       ((next: RawDispatcher) =>
         {
@@ -107,6 +116,16 @@ object Redux {
     Impl.applyMiddleware(asyncMiddleware)
   }
 
+  /**
+   * Creates the redux store object.
+   *
+   * See [[http://redux.js.org/docs/api/createStore.html the redux documentation]]
+   * for detailed description.
+   *
+   * @param reducer       The reducer function
+   * @param initialState  The initial state of the store
+   * @param enhancer      The store enhancer
+   */
   def createStore[S, A](
     reducer: Reducer[S, A],
     initialState: js.UndefOr[S] = js.undefined,
@@ -117,10 +136,16 @@ object Redux {
     create(wrapReducer(reducer), initialState, enhancer)
   }
 
+  /**
+   * Creates the store enhancer from the middleware functions.
+   *
+   * See [[http://redux.js.org/docs/api/applyMiddleware.html the redux documentation]]
+   * for detailed description.
+   */
   def applyMiddleware[S, A](xs: Middleware[S, A]*): Enhancer[S, A] = Impl.applyMiddleware(xs: _*)
 
-  def createAction[A](a: A): WrappedAction = WrappedAction(a)
+  private[redux] def createAction[A](a: A): WrappedAction = WrappedAction(a)
 
-  def createAction[A](a: Future[A]): WrappedAction = WrappedAction(a)
+  private[redux] def createAction[A](a: Future[A]): WrappedAction = WrappedAction(a)
 
 }
