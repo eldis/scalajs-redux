@@ -62,10 +62,13 @@ object ScalaJSRedux {
         )
       )
 
-    def react: PC =
+    def react(dev: Boolean = false): PC =
       _.settings(
         libraryDependencies += Dependencies.scalaJsReact,
-        npmDependencies in Compile ++= Dependencies.jsReactRedux
+        if(dev)
+          npmDevDependencies in Compile ++= Dependencies.jsReactRedux
+        else
+          npmDependencies in Compile ++= Dependencies.jsReactRedux
       )
 
     def exampleProject(prjName: String, useReact: Boolean = false): PC = { p: Project =>
@@ -84,7 +87,7 @@ object ScalaJSRedux {
         )
       } compose { pc =>
         if(useReact)
-          pc.configure(react)
+          pc.configure(react())
         else
           pc
       }
@@ -105,7 +108,7 @@ object ScalaJSRedux {
   object Projects {
     lazy val scalaJsRedux = project.in(file("."))
       .configure(
-        Settings.scalajsProject, Settings.jsBundler, Settings.publish, Settings.react
+        Settings.scalajsProject, Settings.jsBundler, Settings.publish, Settings.react(true)
       )
       .settings(
         name := "scalajs-redux"
