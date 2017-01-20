@@ -2,14 +2,14 @@ package eldis.redux.examples.react
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
-import eldis.redux.{ Redux, ReactRedux }
+import eldis.redux._
 
 object App {
 
   val component = ReactComponentB[Redux.Store[State, Action]]("App")
     .render { scope =>
       {
-        ReactRedux.Provider(scope.props)(
+        react.Provider(scope.props)(
           <.div()(
             <.p()("Type some text to filter the list:"),
             Filter(Filter.Props("hi!")),
@@ -20,7 +20,7 @@ object App {
     }
     .build
 
-  def apply(store: Redux.Store[State, Action]) = component(store)
+  def apply(store: Store[State, Action]) = component(store)
 
 }
 
@@ -51,8 +51,8 @@ object Filter {
     }
     .build
 
-  val connected = ReactRedux.connect(
-    (state: State, dispatch: Redux.Dispatcher[Action]) => Props(
+  val connected = react.connect(
+    (state: State, dispatch: Dispatcher[Action]) => Props(
       value = state.filter,
       onChange = Some((v: String) => dispatch(ChangeFilter(v)))
     )
@@ -76,8 +76,8 @@ object List {
     }
     .build
 
-  val connected = ReactRedux.connect(
-    (state: State, dispatch: Redux.Dispatcher[Action]) => Props(
+  val connected = react.connect(
+    (state: State, dispatch: Dispatcher[Action]) => Props(
       elements = state.filteredElements
     )
   )(component.reactClass)

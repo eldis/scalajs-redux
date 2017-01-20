@@ -1,2 +1,3 @@
 # scalajs-redux
-Redux bindings for ScalaJS
+Redux bindings for ScalaJS.
+

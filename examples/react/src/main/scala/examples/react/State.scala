@@ -1,7 +1,7 @@
 package eldis.redux.examples.react
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import eldis.redux.Redux
+import eldis.redux._
 
 case class State(
   filter: String,

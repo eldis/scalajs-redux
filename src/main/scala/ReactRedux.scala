@@ -8,11 +8,9 @@ import japgolly.scalajs.react._
 import org.scalajs.dom
 import dom.raw.Element
 import japgolly.scalajs.react.vdom.prefix_<^._
+import scala.concurrent.Future
 
-/**
- * React redux facade.
- */
-object ReactRedux {
+private[redux] object ReactRedux {
 
   /** The properties of Provider component. */
   @js.native
@@ -20,7 +18,7 @@ object ReactRedux {
     val store: js.Any = js.native
   }
 
-  private object Impl {
+  object Impl {
 
     object ProviderProps {
       def apply(store: js.Any): ProviderProps =
@@ -43,19 +41,8 @@ object ReactRedux {
 
   }
 
-  /**
-   * The react component that provides the store injection in to the virtual DOM.
-   *
-   * See [[https://github.com/reactjs/react-redux/blob/master/docs/api.md#provider-store the react-redux documentation]]
-   * for detailed description.
-   */
   object Provider {
 
-    /**
-     * Creates the store provider.
-     *
-     * @param store The store that will be injected in the virtual DOM
-     */
     def apply[S, A](store: Redux.Store[S, A])(child: ReactNode) =
       React.createFactory(Impl.Provider)(
         Impl.ProviderProps(store), child
@@ -63,12 +50,11 @@ object ReactRedux {
 
   }
 
-  private type RawConnector[S, P] = Function2[S, Redux.RawDispatcher, P]
+  type RawConnector[S, P] = Function2[S, Redux.RawDispatcher, P]
 
-  /** The function that maps the state and the dispatcher function to the component's properties */
   type Connector[S, A, P] = Function2[S, Redux.Dispatcher[A], P]
 
-  private def connectRaw[S, P, C <: ReactClass[P, _, _, Element]](connector: RawConnector[S, P])(cls: C): C = {
+  def connectRaw[S, P, C <: ReactClass[P, _, _, Element]](connector: RawConnector[S, P])(cls: C): C = {
     def mkConnector(dispatch: Redux.RawDispatcher): js.Function2[S, WrapObj[P], WrapObj[P]] =
       (state: S, _: WrapObj[P]) => WrapObj(connector(state, dispatch))
 
@@ -78,8 +64,8 @@ object ReactRedux {
     Impl.Funcs.connectAdvanced(f)(cls)
   }
 
-  private def connectImpl[S, A, P, C <: ReactClass[P, _, _, Element]](connector: Connector[S, A, P])(cls: C): C = {
-    val raw: RawConnector[S, P] = (s, d) => connector(s, (a: A) => d(Redux.createAction(a)))
+  def connectImpl[S, A, P, C <: ReactClass[P, _, _, Element]](connector: Connector[S, A, P])(cls: C): C = {
+    val raw: RawConnector[S, P] = (s, d) => connector(s, (a: A | Future[A]) => d(Redux.wrapAction(a)))
     connectRaw(raw)(cls)
   }
 
@@ -88,12 +74,6 @@ object ReactRedux {
     def apply(props: Props, children: ReactNode*): ReactComponentU[Props, State, Backend, Node]
   }
 
-  /**
-   * Creates the connected to state component factory.
-   *
-   * @param connector  The function that maps state and dispatcher function to component's properties
-   * @param cls        The component's class
-   */
   def connect[S, A, P, S1, B](connector: Connector[S, A, P])(cls: ReactClass[P, S1, B, Element]): ConnectedComponentFactory[P, S1, B, Element] =
     new ConnectedComponentFactory[P, S1, B, Element] {
       def apply(props: P, children: ReactNode*) = {

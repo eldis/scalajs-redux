@@ -5,10 +5,7 @@ import js.|
 import js.annotation._
 import scala.concurrent.{ Future, ExecutionContext }
 
-/**
- * The redux facade object.
- */
-object Redux {
+private[redux] object Redux {
 
   type Reducer[S, A] = js.Function2[S, A, S]
 
@@ -20,7 +17,7 @@ object Redux {
     val scalaJsReduxAction: js.Any = js.native
   }
 
-  private object WrappedAction {
+  object WrappedAction {
 
     val ActionType = "scalaJsReduxAction"
     val AsyncActionType = "scalaJsReduxAsyncAction"
@@ -36,9 +33,9 @@ object Redux {
     ).asInstanceOf[WrappedAction]
   }
 
-  type Dispatcher[A] = js.Function1[A, Unit]
+  type Dispatcher[A] = js.Function1[A | Future[A], Unit]
 
-  type RawDispatcher = Dispatcher[WrappedAction | js.Object]
+  type RawDispatcher = js.Function1[WrappedAction | js.Object, Unit]
 
   @js.native
   trait MiddlewareArg[S, A] extends js.Object {
@@ -52,12 +49,6 @@ object Redux {
 
   type Unsubscriber = js.Function0[Unit]
 
-  /**
-   * The redux store object.
-   *
-   * See [[http://redux.js.org/docs/api/Store.html the redux documentation]]
-   * for detailed description.
-   */
   @js.native
   trait Store[S, A] extends js.Object {
     val getState: StateGetter[S] = js.native
@@ -70,7 +61,7 @@ object Redux {
 
   @JSImport("redux", JSImport.Namespace)
   @js.native
-  private object Impl extends js.Object {
+  object Impl extends js.Object {
     def createStore[S, A](
       reducer: Reducer[S, A | js.Object],
       initialState: js.UndefOr[S] = js.undefined,
@@ -80,7 +71,7 @@ object Redux {
     def applyMiddleware[S, A](xs: Middleware[S, A]*): Enhancer[S, A] = js.native
   }
 
-  private def wrapReducer[S, A](r: Reducer[S, A]): Reducer[S, A | js.Object] =
+  def wrapReducer[S, A](r: Reducer[S, A]): Reducer[S, A | js.Object] =
     (s: S, a: A | js.Object) => {
       val aDyn = a.asInstanceOf[js.Dynamic]
       if (aDyn.`type` != js.undefined) {
@@ -93,7 +84,7 @@ object Redux {
       }
     }
 
-  private def asyncEnhancer[S, A](implicit ec: ExecutionContext): Enhancer[S, A] = {
+  def asyncEnhancer[S, A](implicit ec: ExecutionContext): Enhancer[S, A] = {
     val asyncMiddleware: Middleware[S, A] = ((arg: MiddlewareArg[S, A]) => {
       ((next: RawDispatcher) =>
         {
@@ -116,16 +107,6 @@ object Redux {
     Impl.applyMiddleware(asyncMiddleware)
   }
 
-  /**
-   * Creates the redux store object.
-   *
-   * See [[http://redux.js.org/docs/api/createStore.html the redux documentation]]
-   * for detailed description.
-   *
-   * @param reducer       The reducer function
-   * @param initialState  The initial state of the store
-   * @param enhancer      The store enhancer
-   */
   def createStore[S, A](
     reducer: Reducer[S, A],
     initialState: js.UndefOr[S] = js.undefined,
@@ -136,16 +117,10 @@ object Redux {
     create(wrapReducer(reducer), initialState, enhancer)
   }
 
-  /**
-   * Creates the store enhancer from the middleware functions.
-   *
-   * See [[http://redux.js.org/docs/api/applyMiddleware.html the redux documentation]]
-   * for detailed description.
-   */
   def applyMiddleware[S, A](xs: Middleware[S, A]*): Enhancer[S, A] = Impl.applyMiddleware(xs: _*)
 
-  private[redux] def createAction[A](a: A): WrappedAction = WrappedAction(a)
+  def wrapAction[A](a: A): WrappedAction = WrappedAction(a)
 
-  private[redux] def createAction[A](a: Future[A]): WrappedAction = WrappedAction(a)
+  def wrapAction[A](a: Future[A]): WrappedAction = WrappedAction(a)
 
 }

@@ -19,10 +19,7 @@ class ReduxSpec extends AsyncFunSpec with Matchers {
 
   describe("Store") {
 
-    import Redux._
-
     def reducer(s: State, a: Action): State = {
-      println("REDUCER: " + a)
       a match {
         case ChangeNum(v) => s.copy(num = v)
         case ChangeStr(v) => s.copy(str = v)
@@ -39,10 +36,10 @@ class ReduxSpec extends AsyncFunSpec with Matchers {
 
       val store = mkStore
 
-      store.dispatch(createAction(ChangeNum(100)))
+      store.dispatch(wrapAction(ChangeNum(100)))
       store.getState().num shouldBe 100
 
-      store.dispatch(createAction(ChangeStr("test")))
+      store.dispatch(wrapAction(ChangeStr("test")))
       store.getState().str shouldBe "test"
     }
 
@@ -51,7 +48,7 @@ class ReduxSpec extends AsyncFunSpec with Matchers {
 
       val p = Promise[Action]()
       val f = p.future
-      store.dispatch(createAction(f))
+      store.dispatch(wrapAction(f))
 
       store.getState() shouldBe State()
 
