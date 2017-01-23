@@ -2,9 +2,7 @@ package eldis.redux
 
 import org.scalatest._
 import scala.concurrent.Promise
-import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
-import scala.util.Try
 
 class ReduxSpec extends AsyncFunSpec with Matchers {
 

@@ -52,10 +52,13 @@ object Filter {
     .build
 
   val connected = react.connect(
-    (state: State, dispatch: Dispatcher[Action]) => Props(
-      value = state.filter,
-      onChange = Some((v: String) => dispatch(ChangeFilter(v)))
-    )
+    (dispatch: Dispatcher[Action]) => {
+      val onChange = (v: String) => dispatch(ChangeFilter(v))
+      (state: State) => Props(
+        value = state.filter,
+        onChange = Some(onChange)
+      )
+    }
   )(component.reactClass)
 
   def apply() = connected(Props(""))
@@ -77,7 +80,7 @@ object List {
     .build
 
   val connected = react.connect(
-    (state: State, dispatch: Dispatcher[Action]) => Props(
+    (dispatch: Dispatcher[Action]) => (state: State) => Props(
       elements = state.filteredElements
     )
   )(component.reactClass)

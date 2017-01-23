@@ -50,13 +50,13 @@ private[redux] object ReactRedux {
 
   }
 
-  type RawConnector[S, P] = Function2[S, Redux.RawDispatcher, P]
+  type RawConnector[S, P] = Function1[Redux.RawDispatcher, Function1[S, P]]
 
-  type Connector[S, A, P] = Function2[S, Redux.Dispatcher[A], P]
+  type Connector[S, A, P] = Function1[Redux.Dispatcher[A], Function1[S, P]]
 
   def connectRaw[S, P, C <: ReactClass[P, _, _, Element]](connector: RawConnector[S, P])(cls: C): C = {
     def mkConnector(dispatch: Redux.RawDispatcher): js.Function2[S, WrapObj[P], WrapObj[P]] =
-      (state: S, _: WrapObj[P]) => WrapObj(connector(state, dispatch))
+      (state: S, _: WrapObj[P]) => WrapObj(connector(dispatch)(state))
 
     val f: Impl.SelectorFactory[S, P] =
       (dispatch: Redux.RawDispatcher, _: js.UndefOr[js.Any]) => mkConnector(dispatch)
@@ -65,7 +65,7 @@ private[redux] object ReactRedux {
   }
 
   def connectImpl[S, A, P, C <: ReactClass[P, _, _, Element]](connector: Connector[S, A, P])(cls: C): C = {
-    val raw: RawConnector[S, P] = (s, d) => connector(s, (a: A | Future[A]) => d(Redux.wrapAction(a)))
+    val raw: RawConnector[S, P] = d => s => connector((a: A | Future[A]) => d(Redux.wrapAction(a)))(s)
     connectRaw(raw)(cls)
   }
 
