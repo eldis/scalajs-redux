@@ -19,7 +19,7 @@ object Store {
       )
   }
 
-  def apply(elements: Seq[String]): Redux.Store[State, Action] = {
+  def apply(elements: Seq[String]): Store[State, Action] = {
     Redux.createStore(
       reducer _,
       State(

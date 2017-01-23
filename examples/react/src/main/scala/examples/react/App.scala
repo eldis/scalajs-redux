@@ -6,14 +6,14 @@ import eldis.redux._
 
 object App {
 
-  val component = ReactComponentB[Redux.Store[State, Action]]("App")
+  val component = ReactComponentB[Store[State, Action]]("App")
     .render { scope =>
       {
         react.Provider(scope.props)(
           <.div()(
             <.p()("Type some text to filter the list:"),
-            Filter(Filter.Props("hi!")),
-            List(List.Props(Seq("a", "b", "c")))
+            Filter(),
+            List()
           )
         )
       }
@@ -58,7 +58,7 @@ object Filter {
     )
   )(component.reactClass)
 
-  def apply(props: Props) = connected(props)
+  def apply() = connected(Props(""))
 
 }
 
@@ -82,6 +82,6 @@ object List {
     )
   )(component.reactClass)
 
-  def apply(props: Props) = connected(props)
+  def apply() = connected(Props(Nil))
 
 }
