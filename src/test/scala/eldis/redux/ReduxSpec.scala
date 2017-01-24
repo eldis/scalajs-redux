@@ -1,8 +1,11 @@
 package eldis.redux
 
+import eldis.redux.Redux.{ WrappedAction => WA }
 import org.scalatest._
+import scalajs.js
 import scala.concurrent.Promise
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import js.|
 
 class ReduxSpec extends AsyncFunSpec with Matchers {
 
@@ -24,15 +27,15 @@ class ReduxSpec extends AsyncFunSpec with Matchers {
       }
     }
 
-    def mkStore = createStore[State, Action](reducer _, State())
+    def mkStore(enhancer: js.UndefOr[Enhancer[State, Action]] = js.undefined) = createStore[State, Action](reducer _, State(), enhancer)
 
     it("must initialize state with defaults") {
-      mkStore.getState() shouldBe State()
+      mkStore().getState() shouldBe State()
     }
 
     it("must dispatch actions") {
 
-      val store = mkStore
+      val store = mkStore()
 
       store.dispatch(wrapAction(ChangeNum(100)))
       store.getState().num shouldBe 100
@@ -42,7 +45,7 @@ class ReduxSpec extends AsyncFunSpec with Matchers {
     }
 
     it("must dispatch async actions") {
-      val store = mkStore
+      val store = mkStore()
 
       val p = Promise[Action]()
       val f = p.future
@@ -55,6 +58,29 @@ class ReduxSpec extends AsyncFunSpec with Matchers {
       store.getState().num shouldBe 1
     }
 
-  }
+    it("must support middleware") {
+      var lastAction: Option[Action] = None
+      val mw = { (arg: MiddlewareArg[State, Action]) =>
+        { (dispatch: RawDispatcher) =>
+          { (a: WA | js.Object) =>
+            val action = a.asInstanceOf[WA]
+            if (action.`type` == WA.ActionType)
+              lastAction = Some(action.scalaJsReduxAction.asInstanceOf[Action])
+            dispatch(action)
+          }: RawDispatcher
+        }: js.Function1[RawDispatcher, RawDispatcher]
+      }: Middleware[State, Action]
 
+      val store = mkStore(applyMiddleware(Seq(mw)))
+      store.dispatch(wrapAction(ChangeNum(100)))
+      lastAction shouldBe Some(ChangeNum(100))
+
+      val p = Promise[Action]()
+      val f = p.future
+      store.dispatch(wrapAction(f))
+      p.success(ChangeStr("str"))
+      lastAction shouldBe Some(ChangeStr("str"))
+    }
+  }
 }
+
