@@ -51,7 +51,7 @@ package object redux {
   @inline def createStore[S, A](
     reducer: Reducer[S, A],
     initialState: js.UndefOr[S] = js.undefined,
-    rawReducer: js.UndefOr[Reducer[js.Any, js.Any]] = js.undefined,
+    rawReducer: js.UndefOr[js.Function] = js.undefined,
     enhancer: js.UndefOr[Enhancer[S, A]] = js.undefined
   )(implicit ex: ExecutionContext): Store[S, A] =
     Redux.createStore(reducer, initialState, rawReducer, enhancer)

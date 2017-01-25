@@ -96,7 +96,6 @@ private[redux] object Redux {
                 val f = aDyn.scalaJsReduxAction.asInstanceOf[Future[A]]
                 f.onSuccess {
                   case a => {
-                    println(a)
                     arg.dispatch(WrappedAction(a))
                   }
                 }
@@ -111,12 +110,12 @@ private[redux] object Redux {
   def createStore[S, A](
     reducer: Reducer[S, A],
     initialState: js.UndefOr[S] = js.undefined,
-    rawReducer: js.UndefOr[Reducer[js.Any, js.Any]] = js.undefined,
+    rawReducer: js.UndefOr[js.Function] = js.undefined,
     enhancer: js.UndefOr[Enhancer[S, A]] = js.undefined
   )(implicit ec: ExecutionContext): Store[S, A] = {
     val enh: Enhancer[S, A] = asyncEnhancer(ec)
     val create = enh(Impl.createStore _)
-    create(wrapReducer(reducer, rawReducer), initialState, enhancer)
+    create(wrapReducer(reducer, rawReducer.asInstanceOf[Reducer[js.Any, js.Any]]), initialState, enhancer)
   }
 
   def applyMiddleware[S, A](xs: Middleware[S, A]*): Enhancer[S, A] = Impl.applyMiddleware(xs: _*)
