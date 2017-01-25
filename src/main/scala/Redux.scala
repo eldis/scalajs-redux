@@ -71,16 +71,17 @@ private[redux] object Redux {
     def applyMiddleware[S, A](xs: Middleware[S, A]*): Enhancer[S, A] = js.native
   }
 
-  def wrapReducer[S, A](r: Reducer[S, A]): Reducer[S, A | js.Object] =
+  def wrapReducer[S, A](reducer: Reducer[S, A], rawReducer: js.UndefOr[Reducer[js.Any, js.Any]]): Reducer[S, A | js.Object] =
     (s: S, a: A | js.Object) => {
+      val newS = rawReducer.map(r => r(s.asInstanceOf[js.Any], a.asInstanceOf[js.Any]).asInstanceOf[S]).getOrElse(s)
       val aDyn = a.asInstanceOf[js.Dynamic]
       if (aDyn.`type` != js.undefined) {
         if (aDyn.`type`.asInstanceOf[String] == WrappedAction.ActionType)
-          r(s, aDyn.scalaJsReduxAction.asInstanceOf[A])
+          reducer(newS, aDyn.scalaJsReduxAction.asInstanceOf[A])
         else
-          s
+          newS
       } else {
-        s
+        newS
       }
     }
 
@@ -110,11 +111,12 @@ private[redux] object Redux {
   def createStore[S, A](
     reducer: Reducer[S, A],
     initialState: js.UndefOr[S] = js.undefined,
+    rawReducer: js.UndefOr[Reducer[js.Any, js.Any]] = js.undefined,
     enhancer: js.UndefOr[Enhancer[S, A]] = js.undefined
   )(implicit ec: ExecutionContext): Store[S, A] = {
     val enh: Enhancer[S, A] = asyncEnhancer(ec)
     val create = enh(Impl.createStore _)
-    create(wrapReducer(reducer), initialState, enhancer)
+    create(wrapReducer(reducer, rawReducer), initialState, enhancer)
   }
 
   def applyMiddleware[S, A](xs: Middleware[S, A]*): Enhancer[S, A] = Impl.applyMiddleware(xs: _*)

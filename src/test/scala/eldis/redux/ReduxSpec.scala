@@ -27,7 +27,7 @@ class ReduxSpec extends AsyncFunSpec with Matchers {
       }
     }
 
-    def mkStore(enhancer: js.UndefOr[Enhancer[State, Action]] = js.undefined) = createStore[State, Action](reducer _, State(), enhancer)
+    def mkStore(enhancer: js.UndefOr[Enhancer[State, Action]] = js.undefined) = createStore[State, Action](reducer _, State(), enhancer = enhancer)
 
     it("must initialize state with defaults") {
       mkStore().getState() shouldBe State()
