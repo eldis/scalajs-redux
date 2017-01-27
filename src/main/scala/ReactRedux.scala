@@ -65,7 +65,17 @@ private[redux] object ReactRedux {
   }
 
   def connectImpl[S, A, P, C <: ReactClass[P, _, _, Element]](connector: Connector[S, A, P])(cls: C): C = {
-    val raw: RawConnector[S, P] = d => s => connector((a: A | Future[A]) => d(Redux.wrapAction(a)))(s)
+    val raw: RawConnector[S, P] = d => {
+      s =>
+        {
+          connector((a: A | Future[A]) => {
+            if (a.isInstanceOf[Future[_]])
+              d(Redux.wrapAction(a.asInstanceOf[Future[A]]))
+            else
+              d(Redux.wrapAction(a.asInstanceOf[A]))
+          })(s)
+        }
+    }
     connectRaw(raw)(cls)
   }
 

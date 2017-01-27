@@ -3,6 +3,7 @@ package eldis.redux.examples.react
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
 import eldis.redux._
+import scala.concurrent._
 
 object App {
 
@@ -53,7 +54,13 @@ object Filter {
 
   val connected = react.connect(
     (dispatch: Dispatcher[Action]) => {
-      val onChange = (v: String) => dispatch(ChangeFilter(v))
+      val onChange = (v: String) => {
+        val p = Promise[Action]()
+        val f = p.future
+        println("Hello, world!")
+        dispatch(f)
+        val _ = p.success(ChangeFilter(v))
+      }
       (state: State) => Props(
         value = state.filter,
         onChange = Some(onChange)
