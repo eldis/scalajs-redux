@@ -98,9 +98,21 @@ package object redux {
     @inline def connect[S, A, P, S1, B](connector: Connector[S, A, P], cls: ReactClass[P, S1, B, Element]): ConnectedComponentFactory[P, S1, B, Element] =
       ReactRedux.connect(connector, cls)
 
+    /**
+     * Connects stateless component to the global state
+     *
+     * @param connector  The function that maps state and dispatcher function to component's properties
+     * @param comp       The component
+     */
     @inline def connect[S, A, P](connector: Connector[S, A, P], comp: FunctionalComponent[P]): FunctionalComponent[P] =
       ReactRedux.connect(connector, comp)
 
+    /**
+     * Connects stateless component with children to the global state
+     *
+     * @param connector  The function that maps state and dispatcher function to component's properties
+     * @param comp       The component
+     */
     @inline def connect[S, A, P](connector: Connector[S, A, P], comp: FunctionalComponent.WithChildren[P]): FunctionalComponent.WithChildren[P] =
       ReactRedux.connect(connector, comp)
   }
