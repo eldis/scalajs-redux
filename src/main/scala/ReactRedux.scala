@@ -32,7 +32,7 @@ private[redux] object ReactRedux {
     @JSImport("react-redux", JSImport.Namespace)
     @js.native
     object Funcs extends js.Object {
-      def connectAdvanced[S, P, C <: ReactClass[P, _, _, Element]](selectorFactory: SelectorFactory[S, P]): js.Function1[C, C] = js.native
+      def connectAdvanced[S, P, C <: js.Any](selectorFactory: SelectorFactory[S, P]): js.Function1[C, C] = js.native
     }
 
     @JSImport("react-redux", "Provider")
@@ -54,7 +54,7 @@ private[redux] object ReactRedux {
 
   type Connector[S, A, P] = Function1[Redux.Dispatcher[A], Function1[S, P]]
 
-  def connectRaw[S, P, C <: ReactClass[P, _, _, Element]](connector: RawConnector[S, P])(cls: C): C = {
+  def connectRaw[S, P, C <: js.Any](connector: RawConnector[S, P])(cls: C): C = {
     def mkConnector(dispatch: Redux.RawDispatcher): js.Function2[S, WrapObj[P], WrapObj[P]] =
       (state: S, _: WrapObj[P]) => WrapObj(connector(dispatch)(state))
 
@@ -64,7 +64,7 @@ private[redux] object ReactRedux {
     Impl.Funcs.connectAdvanced(f)(cls)
   }
 
-  def connectImpl[S, A, P, C <: ReactClass[P, _, _, Element]](connector: Connector[S, A, P])(cls: C): C = {
+  def connectImpl[S, A, P, C <: js.Any](connector: Connector[S, A, P])(cls: C): C = {
     val raw: RawConnector[S, P] = d => {
       s =>
         {
@@ -84,7 +84,7 @@ private[redux] object ReactRedux {
     def apply(props: Props, children: ReactNode*): ReactComponentU[Props, State, Backend, Node]
   }
 
-  def connect[S, A, P, S1, B](connector: Connector[S, A, P])(cls: ReactClass[P, S1, B, Element]): ConnectedComponentFactory[P, S1, B, Element] =
+  def connect[S, A, P, S1, B](connector: Connector[S, A, P], cls: ReactClass[P, S1, B, Element]): ConnectedComponentFactory[P, S1, B, Element] =
     new ConnectedComponentFactory[P, S1, B, Element] {
       def apply(props: P, children: ReactNode*) = {
         React.createFactory(
@@ -92,5 +92,14 @@ private[redux] object ReactRedux {
         )(WrapObj(props), children)
       }
     }
+
+  // def connect[S, A, P, S1, B](connector: Connector[S, A, P])(cls: ReactClass[P, S1, B, Element]): ReactClass[P, S1, B, Element] =
+  //   connectImpl(connector)(cls)
+
+  def connect[S, A, P](connector: Connector[S, A, P], comp: FunctionalComponent[P]): FunctionalComponent[P] =
+    connectImpl(connector)(comp)
+
+  def connect[S, A, P](connector: Connector[S, A, P], comp: FunctionalComponent.WithChildren[P]): FunctionalComponent.WithChildren[P] =
+    connectImpl(connector)(comp)
 
 }

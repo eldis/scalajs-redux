@@ -65,8 +65,9 @@ object Filter {
         value = state.filter,
         onChange = Some(onChange)
       )
-    }
-  )(component.reactClass)
+    },
+    component.reactClass
+  )
 
   def apply() = connected(Props(""))
 
@@ -78,19 +79,17 @@ object List {
     elements: Seq[String]
   )
 
-  val component = ReactComponentB[Props]("List")
-    .render { scope =>
-      <.ul()(
-        scope.props.elements.map(el => <.li()(el))
-      )
-    }
-    .build
+  val component = FunctionalComponent[Props] { props =>
+    <.ul()(
+      props.elements.map(el => <.li()(el))
+    )
+  }
 
   val connected = react.connect(
     (dispatch: Dispatcher[Action]) => (state: State) => Props(
       elements = state.filteredElements
-    )
-  )(component.reactClass)
+    ), component
+  )
 
   def apply() = connected(Props(Nil))
 

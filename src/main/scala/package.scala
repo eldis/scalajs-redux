@@ -1,6 +1,9 @@
 package eldis
 
 import scalajs.js
+import japgolly.scalajs.react._
+import org.scalajs.dom
+import dom.raw.Element
 
 /**
  * The redux facade object.
@@ -84,13 +87,21 @@ package object redux {
     /** The function that maps the state and the dispatcher function to the component's properties */
     type Connector[S, A, P] = ReactRedux.Connector[S, A, P]
 
+    type ConnectedComponentFactory[Props, State, +Backend, +Node <: TopNode] = ReactRedux.ConnectedComponentFactory[Props, State, Backend, Node]
+
     /**
      * Creates the connected to state component factory.
      *
      * @param connector  The function that maps state and dispatcher function to component's properties
      * @param cls        The component's class
      */
-    @inline def connect[S, A, P, S1, B] = ReactRedux.connect[S, A, P, S1, B] _
+    @inline def connect[S, A, P, S1, B](connector: Connector[S, A, P], cls: ReactClass[P, S1, B, Element]): ConnectedComponentFactory[P, S1, B, Element] =
+      ReactRedux.connect(connector, cls)
 
+    @inline def connect[S, A, P](connector: Connector[S, A, P], comp: FunctionalComponent[P]): FunctionalComponent[P] =
+      ReactRedux.connect(connector, comp)
+
+    @inline def connect[S, A, P](connector: Connector[S, A, P], comp: FunctionalComponent.WithChildren[P]): FunctionalComponent.WithChildren[P] =
+      ReactRedux.connect(connector, comp)
   }
 }
