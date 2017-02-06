@@ -3,6 +3,7 @@ package eldis.redux.examples.react
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
 import eldis.redux._
+import eldis.redux.react.{ japgolly => react }
 import scala.concurrent._
 
 object App {
