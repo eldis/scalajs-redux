@@ -70,11 +70,13 @@ package object redux {
   @inline def wrapAction[A](a: A) = Redux.wrapAction(a)
 
   @inline def wrapAction[A](a: Future[A]) = Redux.wrapAction(a)
+}
 
+package redux {
   /**
    * React redux facade.
    */
-  object react {
+  package object react {
 
     /**
      * The react component that provides the store injection in to the virtual DOM.
@@ -82,12 +84,12 @@ package object redux {
      * See [[https://github.com/reactjs/react-redux/blob/master/docs/api.md#provider-store the react-redux documentation]]
      * for detailed description.
      */
-    val Provider = ReactRedux.Provider
+    val Provider = ReactRedux.Japgolly.Provider
 
     /** The function that maps the state and the dispatcher function to the component's properties */
-    type Connector[S, A, P] = ReactRedux.Connector[S, A, P]
+    type Connector[S, A, P] = ReactRedux.Japgolly.Connector[S, A, P]
 
-    type ConnectedComponentFactory[Props, State, +Backend, +Node <: TopNode] = ReactRedux.ConnectedComponentFactory[Props, State, Backend, Node]
+    type ConnectedComponentFactory[Props, State, +Backend, +Node <: TopNode] = ReactRedux.Japgolly.ConnectedComponentFactory[Props, State, Backend, Node]
 
     /**
      * Creates the connected to state component factory.
@@ -96,7 +98,7 @@ package object redux {
      * @param cls        The component's class
      */
     @inline def connect[S, A, P, S1, B](connector: Connector[S, A, P], cls: ReactClass[P, S1, B, Element]): ConnectedComponentFactory[P, S1, B, Element] =
-      ReactRedux.connect(connector, cls)
+      ReactRedux.Japgolly.connect(connector, cls)
 
     /**
      * Connects stateless component to the global state
@@ -105,7 +107,7 @@ package object redux {
      * @param comp       The component
      */
     @inline def connect[S, A, P](connector: Connector[S, A, P], comp: FunctionalComponent[P]): FunctionalComponent[P] =
-      ReactRedux.connect(connector, comp)
+      ReactRedux.Japgolly.connect(connector, comp)
 
     /**
      * Connects stateless component with children to the global state
@@ -114,6 +116,6 @@ package object redux {
      * @param comp       The component
      */
     @inline def connect[S, A, P](connector: Connector[S, A, P], comp: FunctionalComponent.WithChildren[P]): FunctionalComponent.WithChildren[P] =
-      ReactRedux.connect(connector, comp)
+      ReactRedux.Japgolly.connect(connector, comp)
   }
 }
