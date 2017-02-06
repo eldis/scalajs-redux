@@ -2,6 +2,7 @@ import ScalaJSRedux._
 
 scalaVersion in ThisBuild := Versions.scala
 
-lazy val scalaJsRedux = Projects.scalaJsRedux
+lazy val core = Projects.core
+lazy val japgolly = Projects.japgolly
 
 lazy val exReact = Projects.exReact
