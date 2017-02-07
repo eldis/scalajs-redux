@@ -4,5 +4,6 @@ scalaVersion in ThisBuild := Versions.scala
 
 lazy val core = Projects.core
 lazy val japgolly = Projects.japgolly
+lazy val eldis = Projects.eldis
 
 lazy val exReact = Projects.exReact

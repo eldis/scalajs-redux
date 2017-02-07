@@ -9,7 +9,8 @@ object ScalaJSRedux {
 
   object Versions {
     val scala = "2.11.8"
-    val scalaJsReact = "0.11.3"
+    val japgollyReact = "0.11.3"
+    val eldisReact = "0.1.0-SNAPSHOT"
 
     val scalatest = "3.0.1"
   }
@@ -24,7 +25,8 @@ object ScalaJSRedux {
   }
 
   object Dependencies {
-    lazy val scalaJsReact = "com.github.japgolly.scalajs-react" %%%! "core" % Versions.scalaJsReact
+    lazy val japgollyReact = "com.github.japgolly.scalajs-react" %%%! "core" % Versions.japgollyReact
+    lazy val eldisReact = "com.github.eldis" %%%! "scalajs-react" % Versions.eldisReact
 
     lazy val scalatest = "org.scalatest" %%%! "scalatest" % Versions.scalatest % "test"
 
@@ -62,9 +64,18 @@ object ScalaJSRedux {
         )
       )
 
-    def react(dev: Boolean = false): PC =
+    def japgollyReact(dev: Boolean = false): PC =
       _.settings(
-        libraryDependencies += Dependencies.scalaJsReact,
+        libraryDependencies += Dependencies.japgollyReact,
+        if(dev)
+          npmDevDependencies in Compile ++= Dependencies.jsReactRedux
+        else
+          npmDependencies in Compile ++= Dependencies.jsReactRedux
+      )
+
+    def eldisReact(dev: Boolean = false): PC =
+      _.settings(
+        libraryDependencies += Dependencies.eldisReact,
         if(dev)
           npmDevDependencies in Compile ++= Dependencies.jsReactRedux
         else
@@ -87,7 +98,7 @@ object ScalaJSRedux {
         )
       } compose { pc =>
         if(useReact)
-          pc.configure(react())
+          pc.configure(japgollyReact())
         else
           pc
       }
@@ -116,10 +127,19 @@ object ScalaJSRedux {
 
     lazy val japgolly = project.in(file("japgolly"))
       .configure(
-        Settings.scalajsProject, Settings.jsBundler, Settings.publish, Settings.react(true)
+        Settings.scalajsProject, Settings.jsBundler, Settings.publish, Settings.japgollyReact(true)
       )
       .settings(
         name := "scalajs-redux-react-japgolly"
+      )
+      .dependsOn(core)
+
+    lazy val eldis = project.in(file("eldis"))
+      .configure(
+        Settings.scalajsProject, Settings.jsBundler, Settings.publish, Settings.eldisReact(true)
+      )
+      .settings(
+        name := "scalajs-redux-react-eldis"
       )
       .dependsOn(core)
 
