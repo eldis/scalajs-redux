@@ -117,6 +117,13 @@ object ScalaJSRedux {
   }
 
   object Projects {
+
+    lazy val root = project.in(file("."))
+      .aggregate(core, japgolly, eldis)
+      .settings {
+        publish := { }
+      }
+
     lazy val core = project.in(file("core"))
       .configure(
         Settings.scalajsProject, Settings.jsBundler, Settings.publish
@@ -143,10 +150,10 @@ object ScalaJSRedux {
       )
       .dependsOn(core)
 
-    lazy val exReact = project
+    lazy val exJapgolly = project
       .configure(
         Settings.exampleProject(
-          "react",
+          "japgolly",
           useReact = true)
       )
       .dependsOn(japgolly)

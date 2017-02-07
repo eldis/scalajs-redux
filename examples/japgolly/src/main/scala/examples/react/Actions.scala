@@ -1,4 +1,4 @@
-package eldis.redux.examples.react
+package eldis.redux.examples.japgolly
 
 sealed trait Action
 
