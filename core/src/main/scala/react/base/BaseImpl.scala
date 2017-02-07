@@ -1,4 +1,4 @@
-package eldis.redux.react
+package eldis.redux.react.base
 
 import scala.scalajs.js
 import js.annotation._
@@ -8,7 +8,7 @@ import scala.concurrent.Future
 
 import eldis.redux.Redux
 
-private[react] object BaseImpl {
+private[base] object BaseImpl {
 
   type Connector[S, A, P] = Function1[Redux.Dispatcher[A], Function1[S, P]]
   type RawConnector[S, P] = Function1[Redux.RawDispatcher, Function1[S, P]]

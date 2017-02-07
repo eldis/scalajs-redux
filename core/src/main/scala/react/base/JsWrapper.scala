@@ -1,4 +1,4 @@
-package eldis.redux.react
+package eldis.redux.react.base
 
 import scala.scalajs.js
 

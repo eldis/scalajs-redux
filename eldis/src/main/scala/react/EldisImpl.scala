@@ -1,8 +1,11 @@
-package eldis.redux.react
+package eldis.redux.react.eldis
 
 import scala.scalajs.js
 import _root_.eldis.react._
+
 import _root_.eldis.redux
+import redux.react.base
+import base.JsWrapper
 
 private[react] object EldisImpl {
 

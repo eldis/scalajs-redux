@@ -1,10 +1,12 @@
-package eldis.redux.react
+package eldis.redux.react.japgolly
 
 import scala.scalajs.js
 import org.scalajs.dom.raw.Element
 import _root_.japgolly.scalajs.react._
 
 import eldis.redux
+import redux.react.base
+import base.JsWrapper
 
 private[react] object JapgollyImpl {
 
