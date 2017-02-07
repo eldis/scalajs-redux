@@ -32,15 +32,15 @@ private[react] object EldisImpl {
 
   // We need two instances here - native and scala components receive
   // their props in different ways
-  implicit val wrapperInstance: JsObjectWrapper[Wrapped, Any] =
-    new JsObjectWrapper[Wrapped, Any] {
+  implicit val wrapperInstance: JsWrapper[Wrapped] =
+    new JsWrapper[Wrapped] {
       override def wrap[A](a: A) = Wrapped(a)
     }
 
   type Identity[X] = X
-  implicit val identityInstance: JsObjectWrapper[Identity, js.Any] =
-    new JsObjectWrapper[Identity, js.Any] {
-      override def wrap[A <: js.Any](a: A) = a
+  implicit val identityInstance: JsWrapper[Identity] =
+    new JsWrapper[Identity] {
+      override def wrap[A](a: A) = a
     }
 
   @inline

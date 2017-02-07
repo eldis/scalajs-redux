@@ -5,8 +5,8 @@ import scala.scalajs.js
 /**
  * Library-agnostic react redux facade.
  *
- * This is a library-agnostic wrapper over react-redux. You probably
- * want `eldis.redux.react.japgolly` instead.
+ * This API is only intended for implementing connectors to React libraries.
+ * You should probably use one of those instead.
  */
 package object base {
 
@@ -20,9 +20,9 @@ package object base {
    * @param cls        The component's class
    */
   @inline // TODO: F should be subtype of js.Object - fix this in scalajs-react
-  def connect[S, A, P, C <: js.Any, F[_], FP <: js.Any](
+  def connect[S, A, P, C <: js.Any, F[_]: JsWrapper, FP <: js.Any](
     connector: Connector[S, A, P]
-  )(cls: C)(implicit F: JsObjectWrapper[F, P], FP: F[P] =:= FP): C =
+  )(cls: C)(implicit FP: F[P] =:= FP): C =
     BaseImpl.connectImpl[S, A, P, C, F, FP](connector)(cls)
 
   /**

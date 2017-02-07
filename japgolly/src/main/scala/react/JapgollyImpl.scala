@@ -9,7 +9,7 @@ import eldis.redux
 private[react] object JapgollyImpl {
 
   implicit val wrapperInstance =
-    new JsObjectWrapper[WrapObj, Any] {
+    new JsWrapper[WrapObj] {
       override def wrap[A](a: A) = WrapObj(a)
     }
 

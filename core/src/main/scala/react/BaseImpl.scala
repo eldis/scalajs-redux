@@ -30,11 +30,13 @@ private[react] object BaseImpl {
   @js.native
   object Provider extends js.Any
 
-  def connectRaw[S, P, C <: js.Any, F[_], FP <: js.Any](
+  // We need FP and type equality witness here since we can't directly
+  // specify F[P] <: js.Any.
+  def connectRaw[S, P, C <: js.Any, F[_]: JsWrapper, FP <: js.Any](
     connector: RawConnector[S, P]
-  )(cls: C)(implicit F: JsObjectWrapper[F, P], FP: F[P] =:= FP): C = {
+  )(cls: C)(implicit FP: F[P] =:= FP): C = {
     def mkConnector(dispatch: Redux.RawDispatcher): js.Function2[S, FP, FP] =
-      (state: S, _: FP) => FP(F.wrap[P](connector(dispatch)(state)))
+      (state: S, _: FP) => FP(JsWrapper[F].wrap[P](connector(dispatch)(state)))
 
     val f: SelectorFactory[S, FP] =
       (dispatch: Redux.RawDispatcher, _: js.UndefOr[js.Any]) => mkConnector(dispatch)
@@ -42,9 +44,9 @@ private[react] object BaseImpl {
     Funcs.connectAdvanced[S, FP, C](f)(cls)
   }
 
-  def connectImpl[S, A, P, C <: js.Any, F[_], FP <: js.Any](
+  def connectImpl[S, A, P, C <: js.Any, F[_]: JsWrapper, FP <: js.Any](
     connector: Connector[S, A, P]
-  )(cls: C)(implicit F: JsObjectWrapper[F, P], FP: F[P] =:= FP): C = {
+  )(cls: C)(implicit FP: F[P] =:= FP): C = {
     val raw: RawConnector[S, P] = d => {
       s =>
         {
