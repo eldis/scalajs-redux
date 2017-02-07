@@ -150,6 +150,14 @@ object ScalaJSRedux {
           useReact = true)
       )
       .dependsOn(japgolly)
+
+    lazy val exEldis = project
+      .configure(
+        Settings.exampleProject(
+          "eldis",
+          useReact = true)
+      )
+      .dependsOn(eldis)
   }
 
 }

@@ -7,3 +7,4 @@ lazy val japgolly = Projects.japgolly
 lazy val eldis = Projects.eldis
 
 lazy val exReact = Projects.exReact
+lazy val exEldis = Projects.exEldis
