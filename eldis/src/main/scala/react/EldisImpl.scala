@@ -48,6 +48,19 @@ private[react] object EldisImpl {
     base.connect[S, A, P, FunctionalComponent[P], Wrapped, Wrapped[P]](connector)(comp)
 
   @inline
+  def connect[S, A, P](connector: base.Connector[S, A, P], comp: FunctionalComponent.WithChildren[P]): FunctionalComponent.WithChildren[P] =
+    base.connect[S, A, P, FunctionalComponent.WithChildren[P], Wrapped, Wrapped[P]](connector)(comp)
+
+  @inline
+  def connect[S, A, P <: js.Any](connector: base.Connector[S, A, P], comp: NativeFunctionalComponent[P]): NativeFunctionalComponent[P] =
+    base.connect[S, A, P, NativeFunctionalComponent[P], Identity, Identity[P]](connector)(comp)
+
+  @inline
+  def connect[S, A, P <: js.Any](connector: base.Connector[S, A, P], comp: NativeFunctionalComponent.WithChildren[P]): NativeFunctionalComponent.WithChildren[P] =
+    base.connect[S, A, P, NativeFunctionalComponent.WithChildren[P], Identity, Identity[P]](connector)(comp)
+
+  @inline
   def connect[S, A, P <: js.Any](connector: base.Connector[S, A, P], comp: JSComponent[P]): JSComponent[P] =
     base.connect[S, A, P, JSComponent[P], Identity, Identity[P]](connector)(comp)
+
 }

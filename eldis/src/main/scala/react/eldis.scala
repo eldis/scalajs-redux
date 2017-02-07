@@ -19,6 +19,19 @@ package object eldis {
     EldisImpl.connect[S, A, P](connector, comp)
 
   @inline
+  def connect[S, A, P](connector: base.Connector[S, A, P], comp: FunctionalComponent.WithChildren[P]): FunctionalComponent.WithChildren[P] =
+    EldisImpl.connect[S, A, P](connector, comp)
+
+  @inline
+  def connect[S, A, P <: js.Any](connector: base.Connector[S, A, P], comp: NativeFunctionalComponent[P]): NativeFunctionalComponent[P] =
+    EldisImpl.connect[S, A, P](connector, comp)
+
+  @inline
+  def connect[S, A, P <: js.Any](connector: base.Connector[S, A, P], comp: NativeFunctionalComponent.WithChildren[P]): NativeFunctionalComponent.WithChildren[P] =
+    EldisImpl.connect[S, A, P](connector, comp)
+
+  @inline
   def connect[S, A, P <: js.Any](connector: base.Connector[S, A, P], comp: JSComponent[P]): JSComponent[P] =
     EldisImpl.connect[S, A, P](connector, comp)
+
 }
