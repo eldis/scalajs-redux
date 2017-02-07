@@ -3,6 +3,10 @@ package eldis.redux.react
 import _root_.japgolly.scalajs.react._
 import org.scalajs.dom.raw.Element
 
+/**
+ * A wrapper over react-redux, compatible with japgolly's scalajs-react
+ * package.
+ */
 package object japgolly {
 
   /**
@@ -12,6 +16,9 @@ package object japgolly {
    * for detailed description.
    */
   val Provider = JapgollyImpl.Provider
+
+  type ProviderProps = JapgollyImpl.ProviderProps
+  val ProviderProps = JapgollyImpl.ProviderProps
 
   /** The function that maps the state and the dispatcher function to the component's properties */
   type Connector[S, A, P] = base.Connector[S, A, P]

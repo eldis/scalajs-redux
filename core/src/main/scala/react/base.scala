@@ -19,11 +19,11 @@ package object base {
    * @param connector  The function that maps state and dispatcher function to component's properties
    * @param cls        The component's class
    */
-  @inline
-  def connect[S, A, P, C <: js.Any, F[_] <: js.Object: JsObjectWrapper](
+  @inline // TODO: F should be subtype of js.Object - fix this in scalajs-react
+  def connect[S, A, P, C <: js.Any, F[_], FP <: js.Any](
     connector: Connector[S, A, P]
-  )(cls: C): C =
-    BaseImpl.connectImpl[S, A, P, C, F](connector)(cls)
+  )(cls: C)(implicit F: JsObjectWrapper[F, P], FP: F[P] =:= FP): C =
+    BaseImpl.connectImpl[S, A, P, C, F, FP](connector)(cls)
 
   /**
    * React-redux Provider class.

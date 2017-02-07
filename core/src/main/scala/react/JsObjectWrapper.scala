@@ -7,10 +7,11 @@ import scala.scalajs.js
  *
  * Each scalajs react wrapper has its own.
  */
-trait JsObjectWrapper[F[_] <: js.Object] {
-  def wrap[A](a: A): F[A]
+// TODO: F should be subtype of js.Object - fix this in scalajs-react
+trait JsObjectWrapper[F[_ <: R], -R] {
+  def wrap[A <: R](a: A): F[A]
 }
 
 object JsObjectWrapper {
-  def apply[F[_] <: js.Object](implicit F: JsObjectWrapper[F]) = F
+  def apply[F[_ <: R], R](implicit F: JsObjectWrapper[F, R]) = F
 }

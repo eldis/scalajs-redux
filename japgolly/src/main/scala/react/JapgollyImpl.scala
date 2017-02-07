@@ -9,7 +9,7 @@ import eldis.redux
 private[react] object JapgollyImpl {
 
   implicit val wrapperInstance =
-    new JsObjectWrapper[WrapObj] {
+    new JsObjectWrapper[WrapObj, Any] {
       override def wrap[A](a: A) = WrapObj(a)
     }
 
@@ -45,7 +45,7 @@ private[react] object JapgollyImpl {
     new ConnectedComponentFactory[P, S1, B, Element] {
       def apply(props: P, children: ReactNode*) = {
         React.createFactory(
-          base.connect[S, A, P, ReactClass[P, S1, B, Element], WrapObj](connector)(cls)
+          base.connect[S, A, P, ReactClass[P, S1, B, Element], WrapObj, WrapObj[P]](connector)(cls)
         )(WrapObj(props), children)
       }
     }
