@@ -11,9 +11,6 @@ package object eldis {
 
   val Provider = EldisImpl.Provider
 
-  type ProviderProps = EldisImpl.ProviderProps
-  val ProviderProps = EldisImpl.ProviderProps
-
   @inline
   def connect[S, A, P](connector: base.Connector[S, A, P], comp: FunctionalComponent[P]): FunctionalComponent[P] =
     EldisImpl.connect[S, A, P](connector, comp)
