@@ -13,6 +13,7 @@ private[react] object JapgollyImpl {
   implicit val wrapperInstance =
     new JsWrapper[WrapObj] {
       override def wrap[A](a: A) = WrapObj(a)
+      override def unwrap[A](fa: WrapObj[A]) = fa.v
     }
 
   /** The properties of Provider component. */
@@ -43,19 +44,19 @@ private[react] object JapgollyImpl {
     def apply(props: Props, children: ReactNode*): ReactComponentU[Props, State, Backend, Node]
   }
 
-  def connect[S, A, P, S1, B](connector: base.Connector[S, A, P], cls: ReactClass[P, S1, B, Element]): ConnectedComponentFactory[P, S1, B, Element] =
-    new ConnectedComponentFactory[P, S1, B, Element] {
-      def apply(props: P, children: ReactNode*) = {
+  def connect[S, A, P, OP, S1, B](connector: base.Connector[S, A, P, OP], cls: ReactClass[P, S1, B, Element]): ConnectedComponentFactory[OP, S1, B, Element] =
+    new ConnectedComponentFactory[OP, S1, B, Element] {
+      def apply(props: OP, children: ReactNode*) = {
         React.createFactory(
-          base.connect[S, A, P, ReactClass[P, S1, B, Element], WrapObj, WrapObj[P]](connector)(cls)
+          base.connect[S, A, Any, P, OP, ReactClass[?, S1, B, Element], WrapObj, WrapObj[P], WrapObj[OP]](connector)(cls)
         )(WrapObj(props), children)
       }
     }
 
-  def connect[S, A, P](connector: base.Connector[S, A, P], comp: FunctionalComponent[P]): FunctionalComponent[P] =
+  def connect[S, A, P, OP](connector: base.Connector[S, A, P, OP], comp: FunctionalComponent[P]): FunctionalComponent[OP] =
     base.connect(connector)(comp)
 
-  def connect[S, A, P](connector: base.Connector[S, A, P], comp: FunctionalComponent.WithChildren[P]): FunctionalComponent.WithChildren[P] =
+  def connect[S, A, P, OP](connector: base.Connector[S, A, P, OP], comp: FunctionalComponent.WithChildren[P]): FunctionalComponent.WithChildren[OP] =
     base.connect(connector)(comp)
 
 }

@@ -17,6 +17,7 @@ import scala.scalajs.js
  */
 trait JsWrapper[F[_]] {
   def wrap[A](a: A): F[A]
+  def unwrap[A](fa: F[A]): A
 }
 
 object JsWrapper {

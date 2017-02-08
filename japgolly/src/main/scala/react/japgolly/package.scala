@@ -21,7 +21,7 @@ package object japgolly {
   val ProviderProps = JapgollyImpl.ProviderProps
 
   /** The function that maps the state and the dispatcher function to the component's properties */
-  type Connector[S, A, P] = base.Connector[S, A, P]
+  type Connector[S, A, P, OP] = base.Connector[S, A, P, OP]
 
   type ConnectedComponentFactory[Props, State, +Backend, +Node <: TopNode] = JapgollyImpl.ConnectedComponentFactory[Props, State, Backend, Node]
 
@@ -31,7 +31,7 @@ package object japgolly {
    * @param connector  The function that maps state and dispatcher function to component's properties
    * @param cls        The component's class
    */
-  @inline def connect[S, A, P, S1, B](connector: Connector[S, A, P], cls: ReactClass[P, S1, B, Element]): ConnectedComponentFactory[P, S1, B, Element] =
+  @inline def connect[S, A, P, OP, S1, B](connector: Connector[S, A, P, OP], cls: ReactClass[P, S1, B, Element]): ConnectedComponentFactory[OP, S1, B, Element] =
     JapgollyImpl.connect(connector, cls)
 
   /**
@@ -40,7 +40,7 @@ package object japgolly {
    * @param connector  The function that maps state and dispatcher function to component's properties
    * @param comp       The component
    */
-  @inline def connect[S, A, P](connector: Connector[S, A, P], comp: FunctionalComponent[P]): FunctionalComponent[P] =
+  @inline def connect[S, A, P, OP](connector: Connector[S, A, P, OP], comp: FunctionalComponent[P]): FunctionalComponent[OP] =
     JapgollyImpl.connect(connector, comp)
 
   /**
@@ -49,7 +49,7 @@ package object japgolly {
    * @param connector  The function that maps state and dispatcher function to component's properties
    * @param comp       The component
    */
-  @inline def connect[S, A, P](connector: Connector[S, A, P], comp: FunctionalComponent.WithChildren[P]): FunctionalComponent.WithChildren[P] =
+  @inline def connect[S, A, P, OP](connector: Connector[S, A, P, OP], comp: FunctionalComponent.WithChildren[P]): FunctionalComponent.WithChildren[OP] =
     JapgollyImpl.connect(connector, comp)
 
 }

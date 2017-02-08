@@ -10,8 +10,11 @@ import scala.scalajs.js
  */
 package object base {
 
-  /** The function that maps the state and the dispatcher function to the component's properties */
-  type Connector[S, A, P] = BaseImpl.Connector[S, A, P]
+  /**
+   * Maps state, dispatcher function and own properties to the component's
+   * properties.
+   */
+  type Connector[-S, A, +P, -OP] = BaseImpl.Connector[S, A, P, OP]
 
   /**
    * Creates the connected to state component factory.
@@ -20,10 +23,10 @@ package object base {
    * @param cls        The component's class
    */
   @inline // TODO: F should be subtype of js.Object - fix this in scalajs-react
-  def connect[S, A, P, C <: js.Any, F[_]: JsWrapper, FP <: js.Any](
-    connector: Connector[S, A, P]
-  )(cls: C)(implicit FP: F[P] =:= FP): C =
-    BaseImpl.connectImpl[S, A, P, C, F, FP](connector)(cls)
+  def connect[S, A, R, P <: R, OP <: R, C[_ <: R] <: js.Any, F[_]: JsWrapper, FP <: js.Any, FOP <: js.Any](
+    connector: Connector[S, A, P, OP]
+  )(cls: C[P])(implicit FP: F[P] =:= FP, FOP: F[OP] =:= FOP): C[OP] =
+    BaseImpl.connectImpl[S, A, R, P, OP, C, F, FP, FOP](connector)(cls)
 
   /**
    * React-redux Provider class.

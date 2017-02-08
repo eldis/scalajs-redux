@@ -44,7 +44,8 @@ object ScalaJSRedux {
     def commonProject: PC =
       _.settings(
         scalaVersion := Versions.scala,
-        organization := "com.github.eldis"
+        organization := "com.github.eldis",
+        addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
       )
 
     def scalajsProject: PC =
