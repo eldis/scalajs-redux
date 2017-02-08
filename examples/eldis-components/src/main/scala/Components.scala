@@ -14,7 +14,8 @@ object Functional {
     <.div()(props.value)
   }
 
-  val connected = connect[State, Action, ScalaProps, Unit](
+  val connected = connect(
+    // All parameters
     (_: Dispatcher[Action]) => (state: State, ownProps: Unit) => state.functional,
     component
   )
@@ -33,8 +34,9 @@ object FunctionalWithChildren {
       }
   }
 
-  val connected = connect[State, Action, ScalaProps, Unit](
-    (_: Dispatcher[Action]) => (state: State, ownProps: Unit) => state.functionalWithChildren,
+  val connected = connect(
+    // No dispatcher
+    (state: State, ownProps: Unit) => state.functionalWithChildren,
     component
   )
 
@@ -46,7 +48,7 @@ object NativeFunctional {
     <.div()(props.jsValue)
   }
 
-  val connected = connect[State, Action, JSProps, js.Any](
+  val connected = connect(
     (_: Dispatcher[Action]) => (state: State, ownProps: js.Any) => state.nativeFunctional,
     component
   )
@@ -77,8 +79,8 @@ object JS {
   @js.native
   object component extends JSComponent[JSProps]
 
-  val connected = connect[State, Action, JSProps, js.Any](
-    (_: Dispatcher[Action]) => (state: State, ownProps: js.Any) => state.js,
+  val connected = connect(
+    (state: State) => state.js,
     component
   )
 

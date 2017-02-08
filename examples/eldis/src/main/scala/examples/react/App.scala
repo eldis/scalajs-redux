@@ -42,7 +42,7 @@ object Filter {
     )
   }
 
-  val connected = react.connect[State, Action, Props, Unit](
+  val connected = react.connect(
     (dispatch: Dispatcher[Action]) => {
       val onChange = (v: String) => {
         val p = Promise[Action]()
@@ -76,8 +76,8 @@ object List {
     )
   }
 
-  val connected = react.connect[State, Action, Props, Unit](
-    (dispatch: Dispatcher[Action]) => (state: State, ownProps: Unit) => Props(
+  val connected = react.connect(
+    (state: State) => Props(
       elements = state.filteredElements
     ), component
   )

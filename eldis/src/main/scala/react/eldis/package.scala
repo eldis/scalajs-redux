@@ -11,23 +11,37 @@ package object eldis {
   val Provider = EldisImpl.Provider
 
   @inline
-  def connect[S, A, P, OP](connector: base.Connector[S, A, P, OP], comp: FunctionalComponent[P]): FunctionalComponent[OP] =
-    EldisImpl.connect[S, A, P, OP](connector, comp)
+  def connect[C, P, OP](connector: C, comp: FunctionalComponent[P])(
+    implicit
+    C: base.ConnectorLike[C, _, _, P, OP]
+  ): FunctionalComponent[OP] =
+    EldisImpl.connect(C(connector), comp)
 
   @inline
-  def connect[S, A, P, OP](connector: base.Connector[S, A, P, OP], comp: FunctionalComponent.WithChildren[P]): FunctionalComponent.WithChildren[OP] =
-    EldisImpl.connect[S, A, P, OP](connector, comp)
+  def connect[C, P, OP](connector: C, comp: FunctionalComponent.WithChildren[P])(
+    implicit
+    C: base.ConnectorLike[C, _, _, P, OP]
+  ): FunctionalComponent.WithChildren[OP] =
+    EldisImpl.connect(C(connector), comp)
 
   @inline
-  def connect[S, A, P <: js.Any, OP <: js.Any](connector: base.Connector[S, A, P, OP], comp: NativeFunctionalComponent[P]): NativeFunctionalComponent[OP] =
-    EldisImpl.connect[S, A, P, OP](connector, comp)
+  def connect[C, P <: js.Any, OP <: js.Any](connector: C, comp: NativeFunctionalComponent[P])(
+    implicit
+    C: base.ConnectorLike[C, _, _, P, OP]
+  ): NativeFunctionalComponent[OP] =
+    EldisImpl.connect(C(connector), comp)
 
   @inline
-  def connect[S, A, P <: js.Any, OP <: js.Any](connector: base.Connector[S, A, P, OP], comp: NativeFunctionalComponent.WithChildren[P]): NativeFunctionalComponent.WithChildren[OP] =
-    EldisImpl.connect[S, A, P, OP](connector, comp)
+  def connect[C, P <: js.Any, OP <: js.Any](connector: C, comp: NativeFunctionalComponent.WithChildren[P])(
+    implicit
+    C: base.ConnectorLike[C, _, _, P, OP]
+  ): NativeFunctionalComponent.WithChildren[OP] =
+    EldisImpl.connect(C(connector), comp)
 
   @inline
-  def connect[S, A, P <: js.Any, OP <: js.Any](connector: base.Connector[S, A, P, OP], comp: JSComponent[P]): JSComponent[OP] =
-    EldisImpl.connect[S, A, P, OP](connector, comp)
-
+  def connect[C, P <: js.Any, OP <: js.Any](connector: C, comp: JSComponent[P])(
+    implicit
+    C: base.ConnectorLike[C, _, _, P, OP]
+  ): JSComponent[OP] =
+    EldisImpl.connect(C(connector), comp)
 }
