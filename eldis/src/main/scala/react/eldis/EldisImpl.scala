@@ -1,6 +1,8 @@
 package eldis.redux.react.eldis
 
 import scala.scalajs.js
+import js.|
+import js.annotation._
 import _root_.eldis.react._
 
 import _root_.eldis.redux
