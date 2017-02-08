@@ -11,26 +11,29 @@ import redux._
 import redux.react.eldis._
 
 object Main extends JSApp {
-
   val App = FunctionalComponent[Store[State, Action]] { (store: Store[State, Action]) =>
     Provider(store)(
       <.div()(
         <.ul()(
-          <.li()(Functional(ScalaProps("Functional Failed"))),
+          <.li()(Functional()),
           <.li()(FunctionalWithChildren(
-            ScalaProps("Functional with children Failed"),
             js.Array(
-              <.p()("&nbsp;&nbsp;Child1 OK"),
-              <.p()("&nbsp;&nbsp;Child2 OK")
+              <.p()("  Child 1 OK"),
+              <.p()("  Child 2 OK")
             )
           )),
-          <.li()(NativeFunctional(JSProps("Native functional Failed"))),
-          <.li()(NativeFunctionalWithChildren(JSProps("Native functional with children Failed"), js.Array[ReactNode](
-            <.p()("&nbsp;&nbsp;Child OK")
-          ))),
+          <.li()(NativeFunctional()),
+          <.li()(
+            NativeFunctionalWithChildren(
+              js.Array[ReactNode](
+                <.p()("  Child 1 OK"),
+                <.p()("  Child 2 OK")
+              )
+            )
+          ),
           <.li()(JS(
-            JSProps("JS Failed"),
-            <.p()("&nbsp;&nbsp; Child OK")
+            <.p()("  Child 1 OK"),
+            <.p()("  Child 2 OK")
           ))
         )
       )

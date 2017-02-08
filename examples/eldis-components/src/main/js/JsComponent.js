@@ -2,13 +2,11 @@ var React = require('react');
 
 module.exports = function(props) {
 
-  console.log("props in js component: ", props);
-  console.log("children in js component: ", props.children);
-
-  return React.createElement(
-    "p",
+  var args = [
+    "div",
     null,
-    "jsValue in JS component: " + props.jsValue
-  );
+    "jsValue in JS component: " + props.jsValue,
+  ].concat(props.children)
 
+  return React.createElement.apply(React, args)
 };

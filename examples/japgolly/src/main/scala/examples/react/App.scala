@@ -53,24 +53,28 @@ object Filter {
     }
     .build
 
-  val connected = react.connect(
-    (dispatch: Dispatcher[Action]) => {
-      val onChange = (v: String) => {
-        val p = Promise[Action]()
-        val f = p.future
-        println("Hello, world!")
-        dispatch(f)
-        val _ = p.success(ChangeFilter(v))
+  val connected = {
+    val connector: react.Connector[State, Action, Props, Unit] =
+      (dispatch: Dispatcher[Action]) => {
+        val onChange = (v: String) => {
+          val p = Promise[Action]()
+          val f = p.future
+          println("Hello, world!")
+          dispatch(f)
+          val _ = p.success(ChangeFilter(v))
+        }
+        (state: State, ownProps: Unit) => Props(
+          value = state.filter,
+          onChange = Some(onChange)
+        )
       }
-      (state: State) => Props(
-        value = state.filter,
-        onChange = Some(onChange)
-      )
-    },
-    component.reactClass
-  )
+    react.connect(
+      connector,
+      component.reactClass
+    )
+  }
 
-  def apply() = connected(Props(""))
+  def apply() = connected(())
 
 }
 
@@ -86,12 +90,15 @@ object List {
     )
   }
 
-  val connected = react.connect(
-    (dispatch: Dispatcher[Action]) => (state: State) => Props(
-      elements = state.filteredElements
-    ), component
-  )
+  val connected = {
+    react.connect[State, Action, Props, Unit](
+      (dispatch: Dispatcher[Action]) => (state: State, ownProps: Unit) => Props(
+        elements = state.filteredElements
+      ),
+      component
+    )
+  }
 
-  def apply() = connected(Props(Nil))
+  def apply() = connected(())
 
 }
