@@ -2,6 +2,8 @@ package eldis.redux.react
 
 import scala.scalajs.js
 
+import eldis.redux.Dispatcher
+
 /**
  * Library-agnostic react redux facade.
  *
@@ -14,7 +16,8 @@ package object base {
    * Maps state, dispatcher function and own properties to the component's
    * properties.
    */
-  type Connector[-S, A, +P, -OP] = BaseImpl.Connector[S, A, P, OP]
+
+  type Connector[S, A, P, OP] = Function1[Dispatcher[A], Function2[S, OP, P]]
 
   /**
    * Creates the connected to state component factory.

@@ -7,7 +7,6 @@ import _root_.eldis.react._
 
 package object eldis {
   /** The function that maps the state and the dispatcher function to the component's properties */
-  type Connector[S, A, P, OP] = base.Connector[S, A, P, OP]
 
   val Provider = EldisImpl.Provider
 

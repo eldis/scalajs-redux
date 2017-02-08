@@ -10,8 +10,7 @@ import eldis.redux.Redux
 
 private[base] object BaseImpl {
 
-  type Connector[-S, A, +P, -OP] = Redux.Dispatcher[A] => (S, OP) => P
-  type RawConnector[S, P, OP] = Redux.RawDispatcher => (S, OP) => P
+  type RawConnector[S, P, OP] = Function1[Redux.RawDispatcher, Function2[S, OP, P]]
 
   // common JS imports and types
 
