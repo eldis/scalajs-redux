@@ -10,3 +10,4 @@ lazy val eldis = Projects.eldis
 
 lazy val exJapgolly = Projects.exJapgolly
 lazy val exEldis = Projects.exEldis
+lazy val exEldisComponents = Projects.exEldisComponents

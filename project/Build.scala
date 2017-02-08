@@ -165,6 +165,14 @@ object ScalaJSRedux {
           useReact = true)
       )
       .dependsOn(eldis)
+
+    lazy val exEldisComponents = project
+      .configure(
+        Settings.exampleProject(
+          "eldis-components",
+          useReact = true)
+      )
+      .dependsOn(eldis)
   }
 
 }
