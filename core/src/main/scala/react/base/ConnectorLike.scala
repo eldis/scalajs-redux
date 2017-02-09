@@ -11,7 +11,9 @@ import eldis.redux
  * Supported forms:
  *
  * ```
- * (Dispatcher) => (State, OwnProps) => Props
+ * Dispatcher => (State, OwnProps) => Props
+ * Dispatcher => State => Props
+ * Dispatcher => Props
  * (State, OwnProps) => Props
  * State => Props
  * ```
@@ -38,13 +40,31 @@ object ConnectorLike {
       identity
     )
 
-  implicit def viewConnectorLike[S, P, OP] =
+  implicit def noDispatcherConnectorLike[S, P, OP] =
     ConnectorLike[Function2[S, OP, P], S, Nothing, P, OP](
       f => _ => f
     )
 
-  implicit def noOwnViewConnectorLike[S, P, OP] =
+  // We can't make OP a Unit, for example, since some implementations
+  // require it to be a js.Any. So we leave it free.
+  implicit def noOwnConnectorLike[S, A, P, OP] =
+    ConnectorLike[Function1[redux.Dispatcher[A], Function1[S, P]], S, A, P, OP](
+      f => d => {
+        val g = f(d)
+        (s, _) => g(s)
+      }
+    )
+
+  implicit def stateOnlyConnectorLike[S, P, OP] =
     ConnectorLike[Function1[S, P], S, Nothing, P, OP](
-      f => _ => (s: S, _: OP) => f(s)
+      f => _ => (s, _) => f(s)
+    )
+
+  implicit def dispatcherOnlyConnectorLike[S, A, P, OP] =
+    ConnectorLike[Function1[redux.Dispatcher[A], P], S, A, P, OP](
+      f => d => {
+        val result = f(d)
+        (_, _) => result
+      }
     )
 }

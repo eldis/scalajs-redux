@@ -49,7 +49,7 @@ object NativeFunctional {
   }
 
   val connected = connect(
-    (_: Dispatcher[Action]) => (state: State, ownProps: js.Any) => state.nativeFunctional,
+    (_: Dispatcher[Action]) => (state: State) => state.nativeFunctional,
     component
   )
 
