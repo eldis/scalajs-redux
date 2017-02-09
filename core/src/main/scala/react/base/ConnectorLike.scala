@@ -16,14 +16,20 @@ import eldis.redux
  * State => Props
  * ```
  */
-trait ConnectorLike[C, S, A, P, -OP] {
-  def apply(c: C): Connector[S, A, P, OP]
+trait ConnectorLike[C, P, -OP] {
+
+  type State
+  type Action
+
+  def apply(c: C): Connector[State, Action, P, OP]
 }
 
 object ConnectorLike {
 
-  def apply[C, S, A, P, OP](f: Function1[C, Connector[S, A, P, OP]]): ConnectorLike[C, S, A, P, OP] =
-    new ConnectorLike[C, S, A, P, OP] {
+  def apply[C, S, A, P, OP](f: Function1[C, Connector[S, A, P, OP]]) =
+    new ConnectorLike[C, P, OP] {
+      type State = S
+      type Action = A
       def apply(c: C) = f(c)
     }
 
