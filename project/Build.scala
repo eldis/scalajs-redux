@@ -9,7 +9,8 @@ object ScalaJSRedux {
 
   object Versions {
     val scala = "2.11.8"
-    val scalaJsReact = "0.11.3"
+    val japgollyReact = "0.11.3"
+    val eldisReact = "0.1.0-SNAPSHOT"
 
     val scalatest = "3.0.1"
   }
@@ -24,7 +25,8 @@ object ScalaJSRedux {
   }
 
   object Dependencies {
-    lazy val scalaJsReact = "com.github.japgolly.scalajs-react" %%%! "core" % Versions.scalaJsReact
+    lazy val japgollyReact = "com.github.japgolly.scalajs-react" %%%! "core" % Versions.japgollyReact
+    lazy val eldisReact = "com.github.eldis" %%%! "scalajs-react" % Versions.eldisReact
 
     lazy val scalatest = "org.scalatest" %%%! "scalatest" % Versions.scalatest % "test"
 
@@ -42,7 +44,8 @@ object ScalaJSRedux {
     def commonProject: PC =
       _.settings(
         scalaVersion := Versions.scala,
-        organization := "com.github.eldis"
+        organization := "com.github.eldis",
+        addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
       )
 
     def scalajsProject: PC =
@@ -62,9 +65,18 @@ object ScalaJSRedux {
         )
       )
 
-    def react(dev: Boolean = false): PC =
+    def japgollyReact(dev: Boolean = false): PC =
       _.settings(
-        libraryDependencies += Dependencies.scalaJsReact,
+        libraryDependencies += Dependencies.japgollyReact,
+        if(dev)
+          npmDevDependencies in Compile ++= Dependencies.jsReactRedux
+        else
+          npmDependencies in Compile ++= Dependencies.jsReactRedux
+      )
+
+    def eldisReact(dev: Boolean = false): PC =
+      _.settings(
+        libraryDependencies += Dependencies.eldisReact,
         if(dev)
           npmDevDependencies in Compile ++= Dependencies.jsReactRedux
         else
@@ -87,7 +99,7 @@ object ScalaJSRedux {
         )
       } compose { pc =>
         if(useReact)
-          pc.configure(react())
+          pc.configure(japgollyReact())
         else
           pc
       }
@@ -106,21 +118,62 @@ object ScalaJSRedux {
   }
 
   object Projects {
-    lazy val scalaJsRedux = project.in(file("."))
+
+    lazy val root = project.in(file("."))
+      .aggregate(core, japgolly, eldis)
+      .settings {
+        publish := { }
+      }
+
+    lazy val core = project.in(file("core"))
       .configure(
-        Settings.scalajsProject, Settings.jsBundler, Settings.publish, Settings.react(true)
+        Settings.scalajsProject, Settings.jsBundler, Settings.publish
       )
       .settings(
-        name := "scalajs-redux"
+        name := "scalajs-redux-core"
       )
 
-    lazy val exReact = project
+    lazy val japgolly = project.in(file("japgolly"))
+      .configure(
+        Settings.scalajsProject, Settings.jsBundler, Settings.publish, Settings.japgollyReact(true)
+      )
+      .settings(
+        name := "scalajs-redux-react-japgolly"
+      )
+      .dependsOn(core)
+
+    lazy val eldis = project.in(file("eldis"))
+      .configure(
+        Settings.scalajsProject, Settings.jsBundler, Settings.publish, Settings.eldisReact(true)
+      )
+      .settings(
+        name := "scalajs-redux-react-eldis"
+      )
+      .dependsOn(core)
+
+    lazy val exJapgolly = project
       .configure(
         Settings.exampleProject(
-          "react",
+          "japgolly",
           useReact = true)
       )
-      .dependsOn(scalaJsRedux)
+      .dependsOn(japgolly)
+
+    lazy val exEldis = project
+      .configure(
+        Settings.exampleProject(
+          "eldis",
+          useReact = true)
+      )
+      .dependsOn(eldis)
+
+    lazy val exEldisComponents = project
+      .configure(
+        Settings.exampleProject(
+          "eldis-components",
+          useReact = true)
+      )
+      .dependsOn(eldis)
   }
 
 }

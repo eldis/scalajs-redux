@@ -1,8 +1,9 @@
-package eldis.redux.examples.react
+package eldis.redux.examples.japgolly
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
 import eldis.redux._
+import eldis.redux.react.{ japgolly => react }
 import scala.concurrent._
 
 object App {
@@ -57,11 +58,10 @@ object Filter {
       val onChange = (v: String) => {
         val p = Promise[Action]()
         val f = p.future
-        println("Hello, world!")
         dispatch(f)
         val _ = p.success(ChangeFilter(v))
       }
-      (state: State) => Props(
+      (state: State, ownProps: Unit) => Props(
         value = state.filter,
         onChange = Some(onChange)
       )
@@ -69,7 +69,7 @@ object Filter {
     component.reactClass
   )
 
-  def apply() = connected(Props(""))
+  def apply() = connected(())
 
 }
 
@@ -86,11 +86,12 @@ object List {
   }
 
   val connected = react.connect(
-    (dispatch: Dispatcher[Action]) => (state: State) => Props(
+    (state: State) => Props(
       elements = state.filteredElements
-    ), component
+    ),
+    component
   )
 
-  def apply() = connected(Props(Nil))
+  def apply() = connected(())
 
 }

@@ -1,0 +1,33 @@
+package eldis.redux.examples.japgolly
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import eldis.redux._
+
+case class State(
+  filter: String,
+  elements: Seq[String],
+  filteredElements: Seq[String]
+)
+
+object Store {
+
+  def reducer(s: State, a: Action): State = a match {
+    case ChangeFilter(v) =>
+      s.copy(
+        filter = v,
+        filteredElements = s.elements.filter(v.isEmpty() || _.toLowerCase.contains(v.toLowerCase))
+      )
+  }
+
+  def apply(elements: Seq[String]): Store[State, Action] = {
+    Redux.createStore(
+      reducer _,
+      State(
+        filter = "",
+        elements = elements,
+        filteredElements = elements
+      )
+    )
+  }
+
+}
