@@ -42,22 +42,63 @@ private[base] object BaseImpl {
   def connectRaw[S, R, P <: R, OP <: R, C[_ <: R] <: js.Any, F[_]: JsWrapper, FP <: js.Any, FOP <: js.Any](
     connector: RawConnector[S, P, OP]
   )(cls: C[P])(implicit FP: F[P] =:= FP, FOP: F[OP] =:= FOP): C[OP] = {
-    def mkConnector(dispatch: Redux.RawDispatcher): js.Function2[S, FOP with StandardProps, FP with StandardProps] =
+    def mkConnector(dispatch: Redux.RawDispatcher): js.Function2[S, FOP with StandardProps, FP with StandardProps] = {
+      // Only do this once!
+      val selectorImpl = connector(dispatch)
       (state: S, ownProps: FOP with StandardProps) => {
         val wrapper = JsWrapper[F]
         val fop = ownProps.asInstanceOf[F[OP]]
         val op = wrapper.unwrap(fop)
-        val fp0: F[P] = wrapper.wrap[P](connector(dispatch)(state, op))
+        val fp0: F[P] = wrapper.wrap[P](selectorImpl(state, op))
         val fp = fp0.asInstanceOf[FP]
         // Make sure all the properties are copied!
         fp.asInstanceOf[js.Dynamic].children = ownProps.children
         fp.asInstanceOf[FP with StandardProps]
       }
+    }
 
     val f: SelectorFactory[S, FP, FOP] =
       (dispatch: Redux.RawDispatcher, _: js.UndefOr[js.Any]) => mkConnector(dispatch)
 
-    Funcs.connectAdvanced[S, FP, FOP, C[P], C[OP]](f)(cls)
+    val memoF: SelectorFactory[S, FP, FOP] = memoizeSelectorFactory(f)
+
+    Funcs.connectAdvanced[S, FP, FOP, C[P], C[OP]](memoF)(cls)
+  }
+
+  def memoize2[A, B, C](f: js.Function2[A, B, C]): js.Function2[A, B, C] = {
+
+    // This is quite dirty, but we have quite a lot of type bounds as we are.
+    def jsEq[A](x: A, y: A): Boolean =
+      x.asInstanceOf[js.Any] eq y.asInstanceOf[js.Any]
+
+    var prevA: Option[A] = None
+    var prevB: Option[B] = None
+    var prevC: Option[C] = None
+    (a: A, b: B) => {
+      if (prevA.exists(jsEq(a, _)) && prevB.exists(jsEq(b, _))) {
+        // Can do this since C is always Some if A and B are Some.
+        prevC.get
+      } else {
+        val c = f(a, b)
+        prevA = Some(a)
+        prevB = Some(b)
+        prevC = Some(c)
+        c
+      }
+    }
+  }
+
+  /**
+   * Simple factory memoization - consecutive call with the same (eq) arguments
+   * doesn't run `f`.
+   */
+  def memoizeSelectorFactory[S, FP <: js.Any, FOP <: js.Any](
+    f: SelectorFactory[S, FP, FOP]
+  ): SelectorFactory[S, FP, FOP] = {
+    val g = (dispatch: Redux.RawDispatcher, opts: js.UndefOr[js.Any]) =>
+      memoize2(f(dispatch, opts))
+
+    memoize2(g)
   }
 
   def connectImpl[S, A, R, P <: R, OP <: R, C[_ <: R] <: js.Any, F[_]: JsWrapper, FP <: js.Any, FOP <: js.Any](
