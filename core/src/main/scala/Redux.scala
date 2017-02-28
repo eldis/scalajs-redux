@@ -7,7 +7,7 @@ import scala.concurrent.{ Future, ExecutionContext }
 
 private[redux] object Redux {
 
-  type Reducer[S, A] = js.Function2[S, A, S]
+  type Reducer[S, -A] = js.Function2[S, A, S]
 
   type StateGetter[S] = js.Function0[S]
 
