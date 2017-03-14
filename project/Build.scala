@@ -83,6 +83,11 @@ object ScalaJSRedux {
           npmDependencies in Compile ++= Dependencies.jsReactRedux
       )
 
+    def snapshotResolvers: PC =
+      _.settings(
+        resolvers += Opts.resolver.sonatypeSnapshots
+      )
+
     def exampleProject(prjName: String, useReact: Boolean = false): PC = { p: Project =>
       p.in(file("examples") / prjName)
         .configure(scalajsProject, jsBundler)
@@ -144,7 +149,8 @@ object ScalaJSRedux {
 
     lazy val eldis = project.in(file("eldis"))
       .configure(
-        Settings.scalajsProject, Settings.jsBundler, Settings.publish, Settings.eldisReact(true)
+        Settings.scalajsProject, Settings.jsBundler, Settings.publish, Settings.eldisReact(true),
+        Settings.snapshotResolvers
       )
       .settings(
         name := "scalajs-redux-react-eldis"
