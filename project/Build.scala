@@ -169,7 +169,8 @@ object ScalaJSRedux {
       .configure(
         Settings.exampleProject(
           "eldis",
-          useReact = true)
+          useReact = true),
+        Settings.snapshotResolvers
       )
       .dependsOn(eldis)
 
@@ -177,7 +178,8 @@ object ScalaJSRedux {
       .configure(
         Settings.exampleProject(
           "eldis-components",
-          useReact = true)
+          useReact = true),
+        Settings.snapshotResolvers
       )
       .dependsOn(eldis)
   }
