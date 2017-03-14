@@ -10,7 +10,7 @@ object ScalaJSRedux {
   object Versions {
     val scala = "2.11.8"
     val japgollyReact = "0.11.3"
-    val eldisReact = "0.1.0-SNAPSHOT"
+    val eldisReact = "0.2.0-SNAPSHOT"
 
     val scalatest = "3.0.1"
   }

@@ -17,7 +17,7 @@ package object eldis {
       React.createElement(
         baseProvider,
         ProviderProps(store),
-        children: _*
+        children
       )
     }
   }
