@@ -2,6 +2,7 @@ package examples.eldiscomponents
 
 import scala.scalajs.js
 import js.annotation._
+import js.JSConverters._
 import eldis.react._
 import vdom.prefix_<^._
 
@@ -85,5 +86,5 @@ object JS {
   )
 
   def apply(children: ReactNode*) =
-    React.createElement(connected, js.Object(), js.Array(children: _*))
+    React.createElement(connected, js.Object(): js.Any, children)
 }
