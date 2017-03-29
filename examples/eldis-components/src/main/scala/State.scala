@@ -9,6 +9,8 @@ case class State(
   functionalWithChildren: ScalaProps,
   nativeFunctional: JSProps,
   nativeFunctionalWithChildren: JSProps,
+  baseIdentity: JSProps,
+  baseWrapped: ScalaProps,
   js: JSProps
 )
 

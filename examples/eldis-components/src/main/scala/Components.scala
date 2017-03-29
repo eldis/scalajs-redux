@@ -4,6 +4,7 @@ import scala.scalajs.js
 import js.annotation._
 import js.JSConverters._
 import eldis.react._
+import eldis.react.util.ElementBuilder
 import vdom.prefix_<^._
 
 import eldis.redux
@@ -72,6 +73,61 @@ object NativeFunctionalWithChildren {
   )
 
   def apply(children: ReactNode*) = connected((), js.Array(children: _*))
+}
+
+object BaseIdentity {
+
+  @ScalaJSDefined
+  class ComponentImpl extends ComponentBase[eldis.react.Identity, JSProps] {
+
+    type State = Unit
+
+    def initialState = ()
+
+    def render(): ReactNode =
+      <.div()((
+        <.div()(props.jsValue) +:
+        propsChildren
+      ): _*)
+  }
+
+  val component = js.constructorTag[ComponentImpl]
+
+  val connected = connect(
+    (_: Dispatcher[Action]) => (state: State, ownProps: js.Any) =>
+      state.baseIdentity,
+    component
+  )
+
+  def apply(children: ReactNode*): ReactNode =
+    ElementBuilder(connected, js.undefined: js.Any, children)
+}
+
+object BaseWrapped {
+
+  @ScalaJSDefined
+  class ComponentImpl extends Component[ScalaProps]("BaseWrapped.ComponentImpl") {
+
+    type State = Unit
+
+    def initialState = ()
+
+    def render(): ReactNode =
+      <.div()((
+        <.div()(props.value) +:
+        propsChildren
+      ): _*)
+  }
+
+  val component = js.constructorTag[ComponentImpl]
+
+  val connected = connect(
+    (_: Dispatcher[Action]) => (state: State, ownProps: Unit) =>
+      state.baseWrapped,
+    component
+  )
+
+  def apply(children: ReactNode*) = ElementBuilder(connected, (), children)
 }
 
 object JS {

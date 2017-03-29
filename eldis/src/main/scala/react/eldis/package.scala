@@ -22,6 +22,8 @@ package object eldis {
     }
   }
 
+  // TODO: Rewrite all of this to use new scalajs-react idioms
+
   @inline
   def connect[C, P, OP](connector: C, comp: FunctionalComponent[P])(
     implicit
@@ -66,6 +68,30 @@ package object eldis {
     base.connect[C.State, C.Action, js.Any, P, OP, JSComponent, Identity, Identity[P], Identity[OP]](
       C(connector)
     )(comp)
+
+  @inline
+  def connect[C, P, OP](connector: C, comp: js.ConstructorTag[_ <: ComponentBase[Wrapped, P]])(
+    implicit
+    C: base.ConnectorLike[C, P, OP]
+  ): NativeComponentType.WithChildren[Wrapped[OP]] = {
+    type F[A] = NativeComponentType.WithChildren[Wrapped[A]]
+    base.connect[C.State, C.Action, Any, P, OP, F, Wrapped, Wrapped[P], Wrapped[OP]](
+      C(connector)
+    )(comp)
+  }
+
+  @inline
+  def connect[C, P <: js.Any, OP <: js.Any](connector: C, comp: js.ConstructorTag[_ <: ComponentBase[Identity, P]])(
+    implicit
+      C: base.ConnectorLike[C, P, OP],
+      // To break the tie with connect for wrapped ComponentBase
+      unused: Int =:= Int
+  ): NativeComponentType.WithChildren[OP] = {
+    val c0: NativeComponentType.WithChildren[Identity[P]] = comp
+    base.connect[C.State, C.Action, js.Any, P, OP, NativeComponentType.WithChildren, Identity, Identity[P], Identity[OP]](
+      C(connector)
+    )(c0)
+  }
 
   @js.native
   private trait ProviderProps extends js.Object {

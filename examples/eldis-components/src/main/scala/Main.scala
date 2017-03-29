@@ -31,6 +31,20 @@ object Main extends JSApp {
               )
             )
           ),
+          <.li()(
+            BaseIdentity(
+              <.p()("  Child 1 OK"),
+              <.p()("  Child 2 OK")
+            )
+          ),
+          <.li()(
+            BaseWrapped(
+              js.Array[ReactNode](
+                <.p()("  Child 1 OK"),
+                <.p()("  Child 2 OK")
+              )
+            )
+          ),
           <.li()(JS(
             <.p()("  Child 1 OK"),
             <.p()("  Child 2 OK")
@@ -47,6 +61,8 @@ object Main extends JSApp {
         ScalaProps("Functional with children OK"),
         JSProps("Native functional OK"),
         JSProps("Native functional with children OK"),
+        JSProps("Base identity OK"),
+        ScalaProps("Base wrapped OK"),
         JSProps("JS OK")
       ))),
       dom.document.getElementById("root")
